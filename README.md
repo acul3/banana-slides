@@ -1,9 +1,6 @@
 <div align="center">
 
 <img width="256" src="https://github.com/user-attachments/assets/6f9e4cf9-912d-4faa-9d37-54fb676f547e">
-<br><br><br>
-
-<h1> 🍌 蕉幻 (Banana Slides) </h1>
 
 *Vibe your PPT like vibing code.*
 
@@ -18,11 +15,16 @@
 [![License](https://img.shields.io/github/license/Anionex/banana-slides?color=FFD54F)](https://github.com/Anionex/banana-slides/blob/main/LICENSE)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-42b883.svg)
 
-</p>
-  
-一个基于nano banana pro的原生AI PPT生成应用，支持想法/大纲/页面描述生成完整PPT演示文稿、文本图片链接自动提取、上传任意素材、口头提出修改，迈向真正的“Vibe PPT”
+</p> 
 
-*如果该项目对你有用, 欢迎star🌟 & fork🍴*
+<b>一个基于nano banana pro🍌的原生AI PPT生成应用，支持想法/大纲/页面描述生成完整PPT演示文稿、文本图片链接自动提取、上传任意素材、口头提出修改，迈向真正的“Vibe PPT”</b>
+
+<br>
+
+*如果该项目对你有用, 欢迎star🌟 &  fork🍴*
+
+<br>
+
 </p>
 
 </div>
@@ -33,14 +35,32 @@
 - 1️⃣只能选择预设模版，无法灵活调整风格
 - 2️⃣自由度低，多轮改动难以进行 
 - 3️⃣成品观感相似，同质化严重
+- 4️⃣素材质量较低，缺乏针对性
+- 5️⃣图文排版割裂，设计感差
 
-有以上这些缺陷，难以满足我们“快”和“美”的两大PPT制作需求。即使自称Vibe PPT，但是在我的眼中还远不够“Vibe”。
-但是nano banana🍌模型的出现让一切有了转机。我尝试使用🍌pro进行ppt页面生成，发现生成的结果，无论是质量，美感还是一致性，都做的非常好，且几乎能精确渲染所有prompt要求的文字+遵循参考图的风格： 好像真的能生成实用的结果了。那为什么不基于它的这一能力，做一个文生图的"Vibe PPT"应用呢？
+以上这些缺陷，让传统的AI ppt生成器难以同时满足我们“快”和“美”的两大PPT制作需求。即使自称Vibe PPT，但是在我的眼中还远不够“Vibe”。
 
+但是，nano banana🍌模型的出现让一切有了转机。我尝试使用🍌pro进行ppt页面生成，发现生成的结果无论是质量、美感还是一致性，都做的非常好，且几乎能精确渲染prompt要求的所有文字+遵循参考图的风格。那为什么不基于🍌pro，做一个原生的"Vibe PPT"应用呢？
+
+## 🎨 结果案例
+
+
+<div align="center">
+
+| | |
+|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/1a63afc9-ad05-4755-8480-fc4aa64987f1" width="500" alt="案例1"> | <img src="https://github.com/user-attachments/assets/c64cd952-2cdf-4a92-8c34-0322cbf3de4e" width="500" alt="案例2"> |
+| **钱的演变：从贝壳到纸币的旅程** | **DeepSeek-V3.2技术展示** |
+| <img src="https://github.com/user-attachments/assets/d1e15604-767c-42f8-bb41-a2568f18bc2b" width="500" alt="案例3"> | <img src="https://github.com/user-attachments/assets/d1e19152-afc8-4d08-ac90-518fa8bc788e" width="500" alt="案例4"> |
+| **人类对生态环境的影响** | **卷积神经网络介绍** |
+
+</div>
+
+更多可见<a href="https://github.com/Anionex/banana-slides/issues/2" > 使用案例 </a>
 
 ## 🎯 功能介绍
 
-### 亮点
+### Banana-slides🍌 (aka. 蕉幻) 的亮点
 
 - 🚀 **一句话生成 PPT**：从一个简单的想法快速得到大纲、页面描述和最终的 PPT 文稿
 - 🔄 **三种生成路径**：支持从「想法 / 大纲 / 页面描述」三种方式起步，适配不同创作习惯
@@ -217,7 +237,7 @@ cd frontend
 npm run dev
 ```
 
-前端开发服务器将在 `http://localhost:5173` 启动。
+前端开发服务器将在 `http://localhost:3000` 启动。
 
 打开浏览器访问即可使用应用。
 
