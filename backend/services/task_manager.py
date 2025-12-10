@@ -145,6 +145,8 @@ def generate_descriptions_task(task_id: str, project_id: str, ai_service,
                 for future in as_completed(futures):
                     page_id, desc_content, error = future.result()
                     
+                    db.session.expire_all()
+                    
                     # Update page in database
                     page = Page.query.get(page_id)
                     if page:
@@ -330,6 +332,9 @@ def generate_images_task(task_id: str, project_id: str, ai_service, file_service
                 # Process results as they complete
                 for future in as_completed(futures):
                     page_id, image_path, error = future.result()
+                    
+                    
+                    db.session.expire_all()
                     
                     # Update page in database
                     page = Page.query.get(page_id)
