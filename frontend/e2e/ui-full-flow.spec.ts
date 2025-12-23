@@ -3,14 +3,14 @@
  * 
  * This test simulates the complete user operation flow in the browser:
  * 1. Enter idea in frontend
- * 2. Click "Next" button
+ * 2. Click "下一步" (Next) button
  * 3. Click batch generate outline button on outline editor page
  * 4. Wait for outline generation (visible in UI)
- * 5. Click "Next" to go to description editor page
+ * 5. Click "下一步" (Next) to go to description editor page
  * 6. Click batch generate descriptions button
  * 7. Wait for descriptions to generate (visible in UI)
  * 8. Test retry single card functionality
- * 9. Click "Next" to go to image generation page
+ * 9. Click "生成图片" (Generate Images) to go to image generation page
  * 10. Click batch generate images button
  * 11. Wait for images to generate (visible in UI)
  * 12. Export PPT
@@ -182,14 +182,14 @@ test.describe('UI-driven E2E test: From user interface to PPT export', () => {
     }
     
     // ====================================
-    // Step 10: Click "Next" to go to image generation page
+    // Step 10: Click "生成图片" to go to image generation page
     // ====================================
-    console.log('➡️  Step 10: Clicking "Next" to go to image generation page...')
-    const nextBtn2 = page.locator('button:has-text("下一步")')
-    if (await nextBtn2.count() > 0) {
-      await nextBtn2.first().click()
+    console.log('➡️  Step 10: Clicking "生成图片" to go to image generation page...')
+    const generateImagesNavBtn = page.locator('button:has-text("生成图片")')
+    if (await generateImagesNavBtn.count() > 0) {
+      await generateImagesNavBtn.first().click()
       await page.waitForTimeout(1000) // Wait for page transition
-      console.log('✓ Clicked "Next" button\n')
+      console.log('✓ Clicked "生成图片" button\n')
     }
     
     // ====================================
