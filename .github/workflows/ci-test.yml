@@ -2,6 +2,7 @@ name: Full Test Suite
 
 # Full tests run in these cases:
 # 1. Push to main/develop branch (direct push, not from PR merge)
+#    - 仅当代码文件变更时触发（排除 *.md 文件）
 # 2. PR labeled with ready-for-test
 # 3. Manual trigger (workflow_dispatch)
 #
@@ -10,6 +11,8 @@ name: Full Test Suite
 on:
   push:
     branches: [ main, develop ]
+    paths-ignore:
+      - '**/*.md'
   pull_request:
     types: [labeled]
     branches: [ main, develop ]
