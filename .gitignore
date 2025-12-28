@@ -12,6 +12,8 @@
 *.heif
 .venv/
 *.avif
+frontend/node_modules/
+frontend/dist/
 
 !frontend/public/**/*.png
 !frontend/public/**/*.jpg
