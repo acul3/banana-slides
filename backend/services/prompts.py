@@ -148,6 +148,7 @@ You can organize the content in two ways:
 ]
 
 Choose the format that best fits the content. Use parts when the PPT has clear major sections.
+Unless otherwise specified, the first page should be kept simplest, containing only the title, subtitle, and presenter information.
 
 The user's request: {idea_prompt}. Now generate the outline, don't include any other text.
 {get_language_instruction(language)}
@@ -289,7 +290,9 @@ def get_image_generation_prompt(page_desc: str, outline_text: str,
                                 current_section: str,
                                 has_material_images: bool = False,
                                 extra_requirements: str = None,
-                                language: str = None) -> str:
+                                language: str = None,
+                                has_template: bool = True,
+                                page_index: int = 1) -> str:
     """
     生成图片生成 prompt
     
@@ -298,7 +301,9 @@ def get_image_generation_prompt(page_desc: str, outline_text: str,
         outline_text: 大纲文本
         current_section: 当前章节
         has_material_images: 是否有素材图片
-        extra_requirements: 额外的要求
+        extra_requirements: 额外的要求（可能包含风格描述）
+        language: 输出语言
+        has_template: 是否有模板图片（False表示无模板模式）
         
     Returns:
         格式化后的 prompt 字符串
@@ -343,6 +348,8 @@ Current section: {current_section}
 </design_guidelines>
 {get_ppt_language_instruction(language)}
 {material_images_note}{extra_req_text}
+
+{"**注意：当前页面为ppt的封面页，请你采用专业的封面设计美学技巧，务必凸显出页面标题，分清主次，确保一下就能抓住观众的注意力。**" if page_index == 1 else ""}
 """)
     
     logger.debug(f"[get_image_generation_prompt] Final prompt:\n{prompt}")
@@ -708,3 +715,24 @@ Now please modify all page descriptions based on user requirements. Return only 
     final_prompt = files_xml + prompt
     logger.debug(f"[get_descriptions_refinement_prompt] Final prompt:\n{final_prompt}")
     return final_prompt
+
+
+def get_clean_background_prompt() -> str:
+    """
+    生成纯背景图的 prompt（去除文字和插画）
+    用于从完整的PPT页面中提取纯背景
+    """
+    prompt = """\
+<foreground_erasure_task>
+  <role>你是一位专业的图片前景擦除专家。你的任务是：从原始图片中移除文字和配图，输出一张无任何文字内容、干净纯净的背景模板图。</role>
+  <requirements>
+    - 彻底移除页面中的所有文字、插画、图表。必须确保所有文字都被完全去除。
+    - 保持原背景设计的完整性（包括渐变、纹理、图案、线条、色块等）。保留原图的文本框色块。
+    - 对于被前景元素遮挡的背景区域，要智能填补，使背景保持无缝和完整。
+    - 输出图片的尺寸、风格、配色必须和原图完全一致。
+    - 请勿新增任何元素。
+  </requirements>
+</foreground_erasure_task>
+"""
+    logger.debug(f"[get_clean_background_prompt] Final prompt:\n{prompt}")
+    return prompt

@@ -21,7 +21,7 @@ interface ProjectState {
   setError: (error: string | null) => void;
 
   // 项目操作
-  initializeProject: (type: 'idea' | 'outline' | 'description', content: string, templateImage?: File) => Promise<void>;
+  initializeProject: (type: 'idea' | 'outline' | 'description', content: string, templateImage?: File, templateStyle?: string) => Promise<void>;
   syncProject: (projectId?: string) => Promise<void>;
 
   // 页面操作
@@ -56,6 +56,7 @@ interface ProjectState {
   // 导出
   exportPPTX: () => Promise<void>;
   exportPDF: () => Promise<void>;
+  exportEditablePPTX: () => Promise<void>;
 }
 
 export const useProjectStore = create<ProjectState>((set, get) => {
@@ -102,7 +103,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
     setError: (error) => set({ error }),
 
     // 初始化项目
-    initializeProject: async (type, content, templateImage) => {
+    initializeProject: async (type, content, templateImage, templateStyle) => {
       set({ isGlobalLoading: true, error: null });
       try {
         const request: any = {};
@@ -115,12 +116,17 @@ export const useProjectStore = create<ProjectState>((set, get) => {
           request.description_text = content;
         }
 
+        // 添加风格描述（如果有）
+        if (templateStyle && templateStyle.trim()) {
+          request.template_style = templateStyle.trim();
+        }
+
         // 1. 创建项目
         const response = await api.createProject(request);
         const projectId = response.data?.project_id;
 
         if (!projectId) {
-          throw new Error('Failed to create project: No project ID returned');
+          throw new Error('项目创建失败：未返回项目ID');
         }
 
         // 2. 如果有模板图片，上传模板
@@ -154,7 +160,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
           localStorage.setItem('currentProjectId', project.id!);
         }
       } catch (error: any) {
-        set({ error: normalizeErrorMessage(error.message || 'Failed to create project') });
+        set({ error: normalizeErrorMessage(error.message || '创建项目失败') });
         throw error;
       } finally {
         set({ isGlobalLoading: false });
@@ -832,7 +838,32 @@ export const useProjectStore = create<ProjectState>((set, get) => {
         // 使用浏览器直接下载链接，避免 axios 受带宽和超时影响
         window.open(downloadUrl, '_blank');
       } catch (error: any) {
-        set({ error: error.message || 'Failed to export' });
+        set({ error: error.message || '导出失败' });
+      } finally {
+        set({ isGlobalLoading: false });
+      }
+    },
+
+    // 导出可编辑PPTX
+    exportEditablePPTX: async () => {
+      const { currentProject } = get();
+      if (!currentProject) return;
+
+      set({ isGlobalLoading: true, error: null });
+      try {
+        const response = await api.exportEditablePPTX(currentProject.id);
+        // 优先使用相对路径，避免 Docker 环境下的端口问题
+        const downloadUrl =
+          response.data?.download_url || response.data?.download_url_absolute;
+
+        if (!downloadUrl) {
+          throw new Error('导出链接获取失败');
+        }
+
+        // 使用浏览器直接下载链接，避免 axios 受带宽和超时影响
+        window.open(downloadUrl, '_blank');
+      } catch (error: any) {
+        set({ error: error.message || '导出可编辑PPTX失败' });
       } finally {
         set({ isGlobalLoading: false });
       }

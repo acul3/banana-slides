@@ -61,6 +61,7 @@ export interface Project {
   creation_type?: string;
   template_image_url?: string; // 后端返回 template_image_url
   template_image_path?: string; // 前端使用的别名
+  template_style?: string; // 风格描述文本（无模板模式）
   status: ProjectStatus;
   pages: Page[];
   created_at: string;
@@ -95,6 +96,7 @@ export interface CreateProjectRequest {
   outline_text?: string;
   description_text?: string;
   template_image?: File;
+  template_style?: string;
 }
 
 // API响应
@@ -116,6 +118,12 @@ export interface Settings {
   image_aspect_ratio: string;
   max_description_workers: number;
   max_image_workers: number;
+  text_model?: string;
+  image_model?: string;
+  mineru_api_base?: string;
+  mineru_token_length: number;
+  image_caption_model?: string;
+  output_language: 'zh' | 'en' | 'ja' | 'auto';
   created_at?: string;
   updated_at?: string;
 }

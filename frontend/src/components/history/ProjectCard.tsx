@@ -42,6 +42,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   const statusColor = getStatusColor(project);
 
   // Check screen size, only load image on non-mobile screens
+  // 检测屏幕尺寸，只在非手机端加载图片（必须在早期返回之前声明hooks）
   const [shouldLoadImage, setShouldLoadImage] = useState(false);
 
   useEffect(() => {
@@ -56,13 +57,22 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+
+  const projectId = project.id || project.project_id;
+  if (!projectId) return null;
+
+  const title = getProjectTitle(project);
+  const pageCount = project.pages?.length || 0;
+  const statusText = getStatusText(project);
+  const statusColor = getStatusColor(project);
+
   const firstPageImage = shouldLoadImage ? getFirstPageImage(project) : null;
 
   return (
     <Card
       className={`p-3 md:p-6 transition-all ${isSelected
-          ? 'border-2 border-banana-500 bg-banana-50'
-          : 'hover:shadow-lg border border-gray-200'
+        ? 'border-2 border-banana-500 bg-banana-50'
+        : 'hover:shadow-lg border border-gray-200'
         } ${isBatchMode ? 'cursor-default' : 'cursor-pointer'}`}
       onClick={() => onSelect(project)}
     >
@@ -94,8 +104,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             ) : (
               <h3
                 className={`text-base md:text-lg font-semibold text-gray-900 truncate flex-1 min-w-0 ${isBatchMode
-                    ? 'cursor-default'
-                    : 'cursor-pointer hover:text-banana-600 transition-colors'
+                  ? 'cursor-default'
+                  : 'cursor-pointer hover:text-banana-600 transition-colors'
                   }`}
                 onClick={(e) => onStartEdit(e, project)}
                 title={isBatchMode ? undefined : "Click to edit name"}

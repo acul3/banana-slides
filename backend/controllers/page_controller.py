@@ -87,7 +87,6 @@ def delete_page(project_id, page_id):
             return not_found('Page')
         
         # Delete page image if exists
-        from flask import current_app
         file_service = FileService(current_app.config['UPLOAD_FOLDER'])
         file_service.delete_page_image(project_id, page_id)
         
@@ -283,8 +282,6 @@ def generate_page_image(project_id, page_id):
         "force_regenerate": false
     }
     """
-    from flask import current_app as flask_current_app
-    
     try:
         page = Page.query.get(page_id)
         
@@ -358,7 +355,6 @@ def generate_page_image(project_id, page_id):
             })
         
         # Initialize services
-        from flask import current_app
         ai_service = AIService()
         
         file_service = FileService(current_app.config['UPLOAD_FOLDER'])
@@ -368,8 +364,10 @@ def generate_page_image(project_id, page_id):
         if use_template:
             ref_image_path = file_service.get_template_path(project_id)
         
-        if not ref_image_path:
-            return bad_request("No template image found for project")
+        # 检查是否有模板图片或风格描述
+        # 如果都没有，则返回错误
+        if not ref_image_path and not project.template_style:
+            return bad_request("No template image or style description found for project")
         
         # Generate prompt
         page_data = page.get_outline_content() or {}
@@ -397,6 +395,12 @@ def generate_page_image(project_id, page_id):
                 logger.info(f"Found {len(image_urls)} image(s) in page {page_id} description")
                 additional_ref_images = image_urls
                 has_material_images = True
+        
+        # 合并额外要求和风格描述
+        combined_requirements = project.extra_requirements or ""
+        if project.template_style:
+            style_requirement = f"\n\nppt页面风格描述：\n\n{project.template_style}"
+            combined_requirements = combined_requirements + style_requirement
         
         # Create async task for image generation
         task = Task(
@@ -428,7 +432,7 @@ def generate_page_image(project_id, page_id):
             current_app.config['DEFAULT_ASPECT_RATIO'],
             current_app.config['DEFAULT_RESOLUTION'],
             app,
-            project.extra_requirements,
+            combined_requirements if combined_requirements.strip() else None,
             language
         )
         
@@ -479,7 +483,6 @@ def edit_page_image(project_id, page_id):
             return not_found('Project')
         
         # Initialize services
-        from flask import current_app
         ai_service = AIService()
         
         file_service = FileService(current_app.config['UPLOAD_FOLDER'])

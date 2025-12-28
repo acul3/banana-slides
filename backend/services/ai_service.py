@@ -77,10 +77,22 @@ class AIService:
             image_provider: Optional pre-configured ImageProvider. If None, created from factory.
         """
         config = get_config()
-        self.text_model = config.TEXT_MODEL
-        self.image_model = config.IMAGE_MODEL
+
+        # 优先使用 Flask app.config（可由 Settings 覆盖），否则回退到 Config 默认值
+        try:
+            from flask import current_app, has_app_context
+        except ImportError:
+            current_app = None  # type: ignore
+            has_app_context = lambda: False  # type: ignore
+
+        if has_app_context() and current_app and hasattr(current_app, "config"):
+            self.text_model = current_app.config.get("TEXT_MODEL", config.TEXT_MODEL)
+            self.image_model = current_app.config.get("IMAGE_MODEL", config.IMAGE_MODEL)
+        else:
+            self.text_model = config.TEXT_MODEL
+            self.image_model = config.IMAGE_MODEL
         
-        # Use provided providers or create from factory based on AI_PROVIDER_FORMAT env var
+        # Use provided providers or create from factory based on AI_PROVIDER_FORMAT (from Flask config or env var)
         self.text_provider = text_provider or get_text_provider(model=self.text_model)
         self.image_provider = image_provider or get_image_provider(model=self.image_model)
     
@@ -321,6 +333,8 @@ class AIService:
             page_index: Page number (1-indexed)
             has_material_images: 是否有素材图片（从项目描述中提取的图片）
             extra_requirements: Optional extra requirements to apply to all pages
+            language: Output language
+            has_template: 是否有模板图片（False表示无模板模式）
         
         Returns:
             Image generation prompt
@@ -343,7 +357,9 @@ class AIService:
             current_section=current_section,
             has_material_images=has_material_images,
             extra_requirements=extra_requirements,
-            language=language
+            language=language,
+            has_template=has_template,
+            page_index=page_index
         )
         
         return prompt

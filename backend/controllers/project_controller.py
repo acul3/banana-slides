@@ -2,7 +2,8 @@
 Project Controller - handles project-related endpoints
 """
 import logging
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
+from werkzeug.exceptions import BadRequest
 from models import db, Project, Page, Task, ReferenceFile
 from utils import success_response, error_response, not_found, bad_request
 from services import AIService, ProjectContext
@@ -125,6 +126,7 @@ def list_projects():
         })
     
     except Exception as e:
+        logger.error(f"list_projects failed: {str(e)}", exc_info=True)
         return error_response('SERVER_ERROR', str(e), 500)
 
 
@@ -148,7 +150,11 @@ def create_project():
         if not data:
             return bad_request("Request body is required")
         
-        creation_type = data.get('creation_type', 'idea')
+        # creation_type is required
+        if 'creation_type' not in data:
+            return bad_request("creation_type is required")
+        
+        creation_type = data.get('creation_type')
         
         if creation_type not in ['idea', 'outline', 'descriptions']:
             return bad_request("Invalid creation_type")
@@ -159,6 +165,7 @@ def create_project():
             idea_prompt=data.get('idea_prompt'),
             outline_text=data.get('outline_text'),
             description_text=data.get('description_text'),
+            template_style=data.get('template_style'),
             status='DRAFT'
         )
         
@@ -170,6 +177,12 @@ def create_project():
             'status': project.status,
             'pages': []
         }, status_code=201)
+    
+    except BadRequest as e:
+        # Handle JSON parsing errors (invalid JSON body)
+        db.session.rollback()
+        logger.warning(f"create_project: Invalid JSON body - {str(e)}")
+        return bad_request("Invalid JSON in request body")
     
     except Exception as e:
         db.session.rollback()
@@ -192,6 +205,7 @@ def get_project(project_id):
         return success_response(project.to_dict(include_pages=True))
     
     except Exception as e:
+        logger.error(f"get_project failed: {str(e)}", exc_info=True)
         return error_response('SERVER_ERROR', str(e), 500)
 
 
@@ -222,6 +236,10 @@ def update_project(project_id):
         if 'extra_requirements' in data:
             project.extra_requirements = data['extra_requirements']
         
+        # Update template_style if provided
+        if 'template_style' in data:
+            project.template_style = data['template_style']
+        
         # Update page order if provided
         if 'pages_order' in data:
             pages_order = data['pages_order']
@@ -237,6 +255,7 @@ def update_project(project_id):
     
     except Exception as e:
         db.session.rollback()
+        logger.error(f"update_project failed: {str(e)}", exc_info=True)
         return error_response('SERVER_ERROR', str(e), 500)
 
 
@@ -253,7 +272,6 @@ def delete_project(project_id):
         
         # Delete project files
         from services import FileService
-        from flask import current_app
         file_service = FileService(current_app.config['UPLOAD_FOLDER'])
         file_service.delete_project_files(project_id)
         
@@ -265,6 +283,7 @@ def delete_project(project_id):
     
     except Exception as e:
         db.session.rollback()
+        logger.error(f"delete_project failed: {str(e)}", exc_info=True)
         return error_response('SERVER_ERROR', str(e), 500)
 
 
@@ -289,7 +308,6 @@ def generate_outline(project_id):
             return not_found('Project')
         
         # Initialize AI service
-        from flask import current_app
         ai_service = AIService()
         
         # Get request data and language parameter
@@ -391,7 +409,6 @@ def generate_from_description(project_id):
         "language": "zh"  # output language: zh, en, ja, auto
     }
     """
-    from flask import current_app
     
     try:
         project = Project.query.get(project_id)
@@ -525,7 +542,6 @@ def generate_descriptions(project_id):
         outline = _reconstruct_outline_from_pages(pages)
         
         data = request.get_json() or {}
-        from flask import current_app
         # 从配置中读取默认并发数，如果请求中提供了则使用请求的值
         max_workers = data.get('max_workers', current_app.config.get('MAX_DESCRIPTION_WORKERS', 5))
         language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
@@ -580,6 +596,7 @@ def generate_descriptions(project_id):
     
     except Exception as e:
         db.session.rollback()
+        logger.error(f"generate_descriptions failed: {str(e)}", exc_info=True)
         return error_response('SERVER_ERROR', str(e), 500)
 
 
@@ -617,7 +634,6 @@ def generate_images(project_id):
         outline = _reconstruct_outline_from_pages(pages)
         
         data = request.get_json() or {}
-        from flask import current_app
         # 从配置中读取默认并发数，如果请求中提供了则使用请求的值
         max_workers = data.get('max_workers', current_app.config.get('MAX_IMAGE_WORKERS', 8))
         use_template = data.get('use_template', True)
@@ -644,6 +660,12 @@ def generate_images(project_id):
         from services import FileService
         file_service = FileService(current_app.config['UPLOAD_FOLDER'])
         
+        # 合并额外要求和风格描述
+        combined_requirements = project.extra_requirements or ""
+        if project.template_style:
+            style_requirement = f"\n\nppt页面风格描述：\n\n{project.template_style}"
+            combined_requirements = combined_requirements + style_requirement
+        
         # Get app instance for background task
         app = current_app._get_current_object()
         
@@ -660,7 +682,7 @@ def generate_images(project_id):
             current_app.config['DEFAULT_ASPECT_RATIO'],
             current_app.config['DEFAULT_RESOLUTION'],
             app,
-            project.extra_requirements,
+            combined_requirements if combined_requirements.strip() else None,
             language
         )
         
@@ -676,6 +698,7 @@ def generate_images(project_id):
     
     except Exception as e:
         db.session.rollback()
+        logger.error(f"generate_images failed: {str(e)}", exc_info=True)
         return error_response('SERVER_ERROR', str(e), 500)
 
 
@@ -693,6 +716,7 @@ def get_task_status(project_id, task_id):
         return success_response(task.to_dict())
     
     except Exception as e:
+        logger.error(f"get_task_status failed: {str(e)}", exc_info=True)
         return error_response('SERVER_ERROR', str(e), 500)
 
 
@@ -735,7 +759,6 @@ def refine_outline(project_id):
             current_outline = _reconstruct_outline_from_pages(pages)
         
         # Initialize AI service
-        from flask import current_app
         ai_service = AIService()
         
         # Get reference files content and create project context
@@ -905,7 +928,6 @@ def refine_descriptions(project_id):
             })
         
         # Initialize AI service
-        from flask import current_app
         ai_service = AIService()
         
         # Get reference files content and create project context

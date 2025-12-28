@@ -1,11 +1,16 @@
 """
 Google GenAI SDK implementation for image generation
+
+Supports two modes:
+- Google AI Studio: Uses API key authentication
+- Vertex AI: Uses GCP service account authentication
 """
 import logging
 from typing import Optional, List
 from google import genai
 from google.genai import types
 from PIL import Image
+from tenacity import retry, stop_after_attempt, wait_exponential
 from .base import ImageProvider
 from google.genai.types import HttpOptions
 
@@ -13,15 +18,23 @@ logger = logging.getLogger(__name__)
 
 
 class GenAIImageProvider(ImageProvider):
-    """Image generation using Google GenAI SDK"""
-    
-    def __init__(self, api_key: str, api_base: str = None, model: str = "gemini-3-pro-image-preview"):
+    """Image generation using Google GenAI SDK (supports both AI Studio and Vertex AI)"""
+
+    def __init__(
+        self,
+        api_key: str = None,
+        api_base: str = None,
+        model: str = "gemini-3-pro-image-preview",
+        vertexai: bool = False,
+        project_id: str = None,
+        location: str = None
+    ):
         """
         Initialize GenAI image provider
-        
+
         Args:
-            api_key: Google API key
-            api_base: API base URL (for proxies like aihubmix)
+            api_key: Google API key (for AI Studio mode)
+            api_base: API base URL (for proxies like aihubmix, AI Studio mode only)
             model: Model name to use
         """
         self.client = genai.Client(
@@ -40,6 +53,10 @@ class GenAIImageProvider(ImageProvider):
         )
         self.model = model
     
+    @retry(
+        stop=stop_after_attempt(get_config().GENAI_MAX_RETRIES + 1),
+        wait=wait_exponential(multiplier=1, min=2, max=10)
+    )
     def generate_image(
         self,
         prompt: str,

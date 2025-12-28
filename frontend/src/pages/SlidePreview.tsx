@@ -15,8 +15,9 @@ import {
   Upload,
   Image as ImageIcon,
   ImagePlus,
+  Settings,
 } from 'lucide-react';
-import { Button, Loading, Modal, Textarea, useToast, useConfirm, MaterialSelector, Markdown } from '@/components/shared';
+import { Button, Loading, Modal, Textarea, useToast, useConfirm, MaterialSelector, Markdown, ProjectSettingsModal } from '@/components/shared';
 import { MaterialGeneratorModal } from '@/components/shared/MaterialGeneratorModal';
 import { TemplateSelector, getTemplateFile } from '@/components/shared/TemplateSelector';
 import { listUserTemplates, type UserTemplate } from '@/api/endpoints';
@@ -43,6 +44,7 @@ export const SlidePreview: React.FC = () => {
     deletePageById,
     exportPPTX,
     exportPDF,
+    exportEditablePPTX,
     isGlobalLoading,
     taskProgress,
     pageGeneratingTasks,
@@ -73,9 +75,14 @@ export const SlidePreview: React.FC = () => {
   const [extraRequirements, setExtraRequirements] = useState<string>('');
   const [isSavingRequirements, setIsSavingRequirements] = useState(false);
   const [isExtraRequirementsExpanded, setIsExtraRequirementsExpanded] = useState(false);
-  const isEditingRequirements = useRef(false); // Track if user is editing extra requirements
-  const lastProjectId = useRef<string | null>(null); // Track last project ID
-  // Material generation modal toggle (reusable module, just an example entry here)
+  const isEditingRequirements = useRef(false); // 跟踪用户是否正在编辑额外要求
+  const [templateStyle, setTemplateStyle] = useState<string>('');
+  const [isSavingTemplateStyle, setIsSavingTemplateStyle] = useState(false);
+  const [isTemplateStyleExpanded, setIsTemplateStyleExpanded] = useState(false);
+  const isEditingTemplateStyle = useRef(false); // 跟踪用户是否正在编辑风格描述
+  const lastProjectId = useRef<string | null>(null); // 跟踪上一次的项目ID
+  const [isProjectSettingsOpen, setIsProjectSettingsOpen] = useState(false);
+  // 素材生成模态开关（模块本身可复用，这里只是示例入口）
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
   // Material selector modal toggle
   const [userTemplates, setUserTemplates] = useState<UserTemplate[]>([]);
@@ -120,25 +127,32 @@ export const SlidePreview: React.FC = () => {
     loadTemplates();
   }, [projectId, currentProject, syncProject]);
 
-  // When project loads, initialize extra requirements
-  // Only initialize on first load or when project ID changes, to avoid overwriting user's input
+  // 当项目加载后，初始化额外要求和风格描述
+  // 只在项目首次加载或项目ID变化时初始化，避免覆盖用户正在输入的内容
   useEffect(() => {
     if (currentProject) {
       // Check if it's a new project
       const isNewProject = lastProjectId.current !== currentProject.id;
 
       if (isNewProject) {
-        // New project, initialize extra requirements
+        // 新项目，初始化额外要求和风格描述
         setExtraRequirements(currentProject.extra_requirements || '');
+        setTemplateStyle(currentProject.template_style || '');
         lastProjectId.current = currentProject.id || null;
         isEditingRequirements.current = false;
-      } else if (!isEditingRequirements.current) {
-        // Same project and user is not editing, can update (e.g., synced back after save)
-        setExtraRequirements(currentProject.extra_requirements || '');
+        isEditingTemplateStyle.current = false;
+      } else {
+        // 同一项目且用户未在编辑，可以更新（比如从服务器保存后同步回来）
+        if (!isEditingRequirements.current) {
+          setExtraRequirements(currentProject.extra_requirements || '');
+        }
+        if (!isEditingTemplateStyle.current) {
+          setTemplateStyle(currentProject.template_style || '');
+        }
       }
-      // If user is editing (isEditingRequirements.current === true), don't update local state
+      // 如果用户正在编辑，则不更新本地状态
     }
-  }, [currentProject?.id, currentProject?.extra_requirements]);
+  }, [currentProject?.id, currentProject?.extra_requirements, currentProject?.template_style]);
 
   // Load current page's version history
   useEffect(() => {
@@ -181,7 +195,7 @@ export const SlidePreview: React.FC = () => {
 
     if (hasImages) {
       confirm(
-        'Some pages already have images. Regenerating will overwrite them. Continue?',
+        '将重新生成所有页面（历史记录将会保存），确定继续吗？',
         executeGenerate,
         { title: 'Confirm Regeneration', variant: 'warning' }
       );
@@ -518,12 +532,14 @@ export const SlidePreview: React.FC = () => {
     }
   };
 
-  const handleExport = async (type: 'pptx' | 'pdf') => {
+  const handleExport = async (type: 'pptx' | 'pdf' | 'editable-pptx') => {
     setShowExportMenu(false);
     if (type === 'pptx') {
       await exportPPTX();
-    } else {
+    } else if (type === 'pdf') {
       await exportPDF();
+    } else if (type === 'editable-pptx') {
+      await exportEditablePPTX();
     }
   };
 
@@ -568,6 +584,27 @@ export const SlidePreview: React.FC = () => {
       setIsSavingRequirements(false);
     }
   }, [currentProject, projectId, extraRequirements, syncProject, show]);
+
+  const handleSaveTemplateStyle = useCallback(async () => {
+    if (!currentProject || !projectId) return;
+
+    setIsSavingTemplateStyle(true);
+    try {
+      await updateProject(projectId, { template_style: templateStyle || '' });
+      // 保存成功后，标记为不在编辑状态，允许同步更新
+      isEditingTemplateStyle.current = false;
+      // 更新本地项目状态
+      await syncProject(projectId);
+      show({ message: '风格描述已保存', type: 'success' });
+    } catch (error: any) {
+      show({
+        message: `保存失败: ${error.message || '未知错误'}`,
+        type: 'error'
+      });
+    } finally {
+      setIsSavingTemplateStyle(false);
+    }
+  }, [currentProject, projectId, templateStyle, syncProject, show]);
 
   const handleTemplateSelect = async (templateFile: File | null, templateId?: string) => {
     if (!projectId) return;
@@ -678,6 +715,15 @@ export const SlidePreview: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
+            icon={<Settings size={16} className="md:w-[18px] md:h-[18px]" />}
+            onClick={() => setIsProjectSettingsOpen(true)}
+            className="hidden lg:inline-flex"
+          >
+            <span className="hidden xl:inline">项目设置</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             icon={<Upload size={16} className="md:w-[18px] md:h-[18px]" />}
             onClick={() => setIsTemplateModalOpen(true)}
             className="hidden lg:inline-flex"
@@ -725,12 +771,18 @@ export const SlidePreview: React.FC = () => {
               <span className="sm:hidden">Export</span>
             </Button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
                 <button
                   onClick={() => handleExport('pptx')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm"
                 >
-                  Export as PPTX
+                  导出为 PPTX
+                </button>
+                <button
+                  onClick={() => handleExport('editable-pptx')}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm"
+                >
+                  导出可编辑 PPTX（不稳定测试版）
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}
@@ -755,48 +807,8 @@ export const SlidePreview: React.FC = () => {
               onClick={handleGenerateAll}
               className="w-full text-sm md:text-base"
             >
-              Batch Generate ({currentProject.pages.length})
+              批量生成图片 ({currentProject.pages.length})
             </Button>
-
-            {/* Extra requirements */}
-            <div className="border-t border-gray-200 pt-2 md:pt-3">
-              <button
-                onClick={() => setIsExtraRequirementsExpanded(!isExtraRequirementsExpanded)}
-                className="w-full flex items-center justify-between text-xs md:text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                <span>Extra Requirements</span>
-                {isExtraRequirementsExpanded ? (
-                  <ChevronUp size={14} className="md:w-4 md:h-4" />
-                ) : (
-                  <ChevronDown size={14} className="md:w-4 md:h-4" />
-                )}
-              </button>
-
-              {isExtraRequirementsExpanded && (
-                <div className="mt-2 md:mt-3 space-y-2">
-                  <Textarea
-                    value={extraRequirements}
-                    onChange={(e) => {
-                      // Mark user as editing to prevent sync from overwriting
-                      isEditingRequirements.current = true;
-                      setExtraRequirements(e.target.value);
-                    }}
-                    placeholder="e.g., Use compact layout, show main title at top, add more PPT illustrations..."
-                    rows={2}
-                    className="text-xs md:text-sm"
-                  />
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleSaveExtraRequirements}
-                    disabled={isSavingRequirements}
-                    className="w-full text-xs md:text-sm"
-                  >
-                    {isSavingRequirements ? 'Saving...' : 'Save'}
-                  </Button>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Thumbnail list: Desktop vertical, Mobile horizontal scroll */}
@@ -1367,6 +1379,25 @@ export const SlidePreview: React.FC = () => {
             onClose={() => setIsMaterialSelectorOpen(false)}
             onSelect={handleSelectMaterials}
             multiple={true}
+          />
+          {/* 项目设置模态框 */}
+          <ProjectSettingsModal
+            isOpen={isProjectSettingsOpen}
+            onClose={() => setIsProjectSettingsOpen(false)}
+            extraRequirements={extraRequirements}
+            templateStyle={templateStyle}
+            onExtraRequirementsChange={(value) => {
+              isEditingRequirements.current = true;
+              setExtraRequirements(value);
+            }}
+            onTemplateStyleChange={(value) => {
+              isEditingTemplateStyle.current = true;
+              setTemplateStyle(value);
+            }}
+            onSaveExtraRequirements={handleSaveExtraRequirements}
+            onSaveTemplateStyle={handleSaveTemplateStyle}
+            isSavingRequirements={isSavingRequirements}
+            isSavingTemplateStyle={isSavingTemplateStyle}
           />
         </>
       )}
