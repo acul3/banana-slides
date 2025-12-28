@@ -18,10 +18,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  title = '确认操作',
+  title = 'Confirm',
   message,
-  confirmText = '确定',
-  cancelText = '取消',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
   variant = 'warning',
 }) => {
   const handleConfirm = () => {

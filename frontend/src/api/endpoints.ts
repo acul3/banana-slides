@@ -125,9 +125,9 @@ export const generateFromDescription = async (projectId: string, descriptionText
   const lang = language || getStoredOutputLanguage() || 'zh';
   const response = await apiClient.post<ApiResponse>(
     `/api/projects/${projectId}/generate/from-description`,
-    { 
+    {
       ...(descriptionText ? { description_text: descriptionText } : {}),
-      language: lang 
+      language: lang
     }
   );
   return response.data;
@@ -156,10 +156,10 @@ export const generatePageDescription = async (
   forceRegenerate: boolean = false,
   language?: OutputLanguage
 ): Promise<ApiResponse> => {
-  const lang = language || getStoredOutputLanguage() || 'zh'; 
+  const lang = language || getStoredOutputLanguage() || 'zh';
   const response = await apiClient.post<ApiResponse>(
     `/api/projects/${projectId}/pages/${pageId}/generate/description`,
-    { force_regenerate: forceRegenerate , language: lang}
+    { force_regenerate: forceRegenerate, language: lang }
   );
   return response.data;
 };
@@ -717,7 +717,7 @@ export const dissociateFileFromProject = async (
   return response.data;
 };
 
-// ===== 输出语言设置 =====
+// ===== Output Language Settings =====
 
 export type OutputLanguage = 'zh' | 'ja' | 'en' | 'auto';
 
@@ -727,18 +727,18 @@ export interface OutputLanguageOption {
 }
 
 export const OUTPUT_LANGUAGE_OPTIONS: OutputLanguageOption[] = [
-  { value: 'zh', label: '中文' },
-  { value: 'ja', label: '日本語' },
+  { value: 'zh', label: 'Chinese' },
+  { value: 'ja', label: 'Japanese' },
   { value: 'en', label: 'English' },
-  { value: 'auto', label: '自动' },
+  { value: 'auto', label: 'Auto' },
 ];
 
 /**
- * 获取默认输出语言设置（从服务器环境变量读取）
+ * Get default output language setting (read from server environment variable)
  *
- * 注意：这只返回服务器配置的默认语言。
- * 实际的语言选择应由前端在 sessionStorage 中管理，
- * 并在每次生成请求时通过 language 参数传递。
+ * Note: This only returns the default language configured on the server.
+ * The actual language selection should be managed by the frontend in sessionStorage,
+ * and passed via the language parameter in each generation request.
  */
 export const getDefaultOutputLanguage = async (): Promise<ApiResponse<{ language: OutputLanguage }>> => {
   const response = await apiClient.get<ApiResponse<{ language: OutputLanguage }>>(

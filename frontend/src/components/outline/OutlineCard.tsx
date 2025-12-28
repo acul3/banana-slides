@@ -47,28 +47,27 @@ export const OutlineCard: React.FC<OutlineCardProps> = ({
 
   return (
     <Card
-      className={`p-4 relative ${
-        isSelected ? 'border-2 border-banana-500 shadow-yellow' : ''
-      }`}
+      className={`p-4 relative ${isSelected ? 'border-2 border-banana-500 shadow-yellow' : ''
+        }`}
       onClick={!isEditing ? onClick : undefined}
     >
       <ShimmerOverlay show={isAiRefining} />
-      
+
       <div className="flex items-start gap-3 relative z-10">
-        {/* 拖拽手柄 */}
-        <div 
+        {/* Drag handle */}
+        <div
           {...dragHandleProps}
           className="flex-shrink-0 cursor-move text-gray-400 hover:text-gray-600 pt-1"
         >
           <GripVertical size={20} />
         </div>
 
-        {/* 内容区 */}
+        {/* Content area */}
         <div className="flex-1 min-w-0">
-          {/* 页码和章节 */}
+          {/* Page number and section */}
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm font-semibold text-gray-900">
-              第 {index + 1} 页
+              Page {index + 1}
             </span>
             {page.part && (
               <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
@@ -78,21 +77,21 @@ export const OutlineCard: React.FC<OutlineCardProps> = ({
           </div>
 
           {isEditing ? (
-            /* 编辑模式 */
+            /* Edit mode */
             <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
               <input
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-banana-500"
-                placeholder="标题"
+                placeholder="Title"
               />
               <textarea
                 value={editPoints}
                 onChange={(e) => setEditPoints(e.target.value)}
                 rows={5}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-banana-500 resize-none"
-                placeholder="要点（每行一个）"
+                placeholder="Points (one per line)"
               />
               <div className="flex justify-end gap-2">
                 <button
@@ -100,19 +99,19 @@ export const OutlineCard: React.FC<OutlineCardProps> = ({
                   className="px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <X size={16} className="inline mr-1" />
-                  取消
+                  Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   className="px-3 py-1.5 text-sm bg-banana-500 text-black rounded-lg hover:bg-banana-600 transition-colors"
                 >
                   <Check size={16} className="inline mr-1" />
-                  保存
+                  Save
                 </button>
               </div>
             </div>
           ) : (
-            /* 查看模式 */
+            /* View mode */
             <div>
               <h4 className="font-semibold text-gray-900 mb-2">
                 {page.outline_content.title}
@@ -124,7 +123,7 @@ export const OutlineCard: React.FC<OutlineCardProps> = ({
           )}
         </div>
 
-        {/* 操作按钮 */}
+        {/* Action buttons */}
         {!isEditing && (
           <div className="flex-shrink-0 flex gap-2">
             <button
@@ -140,9 +139,9 @@ export const OutlineCard: React.FC<OutlineCardProps> = ({
               onClick={(e) => {
                 e.stopPropagation();
                 confirm(
-                  '确定要删除这一页吗？',
+                  'Are you sure you want to delete this page?',
                   onDelete,
-                  { title: '确认删除', variant: 'danger' }
+                  { title: 'Confirm Delete', variant: 'danger' }
                 );
               }}
               className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"

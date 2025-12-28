@@ -1,5 +1,5 @@
 """
-AI Service Prompts - 集中管理所有 AI 服务的 prompt 模板
+AI Service Prompts - Centralized management of all AI service prompt templates
 """
 import json
 import logging
@@ -15,12 +15,12 @@ logger = logging.getLogger(__name__)
 # 语言配置映射
 LANGUAGE_CONFIG = {
     'zh': {
-        'name': '中文',
-        'instruction': '请使用全中文输出。',
-        'ppt_text': 'PPT文字请使用全中文。'
+        'name': 'Chinese',
+        'instruction': 'Please output all in English。',
+        'ppt_text': 'Use English for PPT text。'
     },
     'ja': {
-        'name': '日本語',
+        'name': 'Japanese',
         'instruction': 'すべて日本語で出力してください。',
         'ppt_text': 'PPTのテキストは全て日本語で出力してください。'
     },
@@ -30,8 +30,8 @@ LANGUAGE_CONFIG = {
         'ppt_text': 'Use English for PPT text.'
     },
     'auto': {
-        'name': '自动',
-        'instruction': '',  # 自动模式不添加语言限制
+        'name': 'Auto',
+        'instruction': '',  # No language restriction for auto mode
         'ppt_text': ''
     }
 }
@@ -42,10 +42,10 @@ def get_default_output_language() -> str:
     获取环境变量中配置的默认输出语言
     
     Returns:
-        语言代码: 'zh', 'ja', 'en', 'auto'
+        Language code: 'zh', 'ja', 'en', 'auto'
     """
     from config import Config
-    return getattr(Config, 'OUTPUT_LANGUAGE', 'zh')
+    return getattr(Config, 'OUTPUT_LANGUAGE', 'en')
 
 
 def get_language_instruction(language: str = None) -> str:
@@ -59,8 +59,8 @@ def get_language_instruction(language: str = None) -> str:
         语言限制指令，如果是自动模式则返回空字符串
     """
     lang = language if language else get_default_output_language()
-    config = LANGUAGE_CONFIG.get(lang, LANGUAGE_CONFIG['zh'])
-    return config['instruction']
+    # Force English instruction for consistency as per user request
+    return "Please answer in English."
 
 
 def get_ppt_language_instruction(language: str = None) -> str:
@@ -74,8 +74,8 @@ def get_ppt_language_instruction(language: str = None) -> str:
         PPT语言限制指令，如果是自动模式则返回空字符串
     """
     lang = language if language else get_default_output_language()
-    config = LANGUAGE_CONFIG.get(lang, LANGUAGE_CONFIG['zh'])
-    return config['ppt_text']
+    # Force English for PPT text
+    return "Use English for PPT text."
 
 
 def _format_reference_files_xml(reference_files_content: Optional[List[Dict[str, str]]]) -> str:
@@ -143,7 +143,8 @@ You can organize the content in two ways:
         {{"title": "Topic 1", "points": ["point1", "point2"]}},
         {{"title": "Topic 2", "points": ["point1", "point2"]}}
     ]
-    }}
+    }},
+    ... (as many parts as needed)
 ]
 
 Choose the format that best fits the content. Use parts when the PPT has clear major sections.
@@ -243,38 +244,38 @@ def get_page_description_prompt(project_context: 'ProjectContext', outline: list
     if project_context.creation_type == 'idea' and project_context.idea_prompt:
         original_input = project_context.idea_prompt
     elif project_context.creation_type == 'outline' and project_context.outline_text:
-        original_input = f"用户提供的大纲：\n{project_context.outline_text}"
+        original_input = f"User provided outline:\n{project_context.outline_text}"
     elif project_context.creation_type == 'descriptions' and project_context.description_text:
-        original_input = f"用户提供的描述：\n{project_context.description_text}"
+        original_input = f"User provided descriptions:\n{project_context.description_text}"
     else:
         original_input = project_context.idea_prompt or ""
     
     prompt = (f"""\
-我们正在为PPT的每一页生成内容描述。
-用户的原始需求是：\n{original_input}\n
-我们已经有了完整的大纲：\n{outline}\n{part_info}
-现在请为第 {page_index} 页生成描述：
+We are generating content descriptions for each page of a PPT.
+The user's original request is:\n{original_input}\n
+We already have the complete outline:\n{outline}\n{part_info}
+Now please generate the description for page {page_index}:
 {page_outline}
 
-【重要提示】生成的"页面文字"部分会直接渲染到PPT页面上，因此请务必注意：
-1. 文字内容要简洁精炼，每条要点控制在15-25字以内
-2. 条理清晰，使用列表形式组织内容
-3. 避免冗长的句子和复杂的表述
-4. 确保内容可读性强，适合在演示时展示
-5. 不要包含任何额外的说明性文字或注释
+[Important] The generated "Page Content" will be directly rendered onto the PPT page, so please ensure:
+1. The content is concise, with each point controlled within 15-30 words.
+2. Clear organization, using list format.
+3. Avoid long sentences and complex expressions.
+4. Ensure strong readability, suitable for presentation.
+5. Do not include any extra explanatory text or comments.
 
-输出格式示例：
-页面标题：原始社会：与自然共生
+Output format example:
+Page Title: Primitive Society: Symbiosis with Nature
 
-页面文字：
-- 狩猎采集文明：人类活动规模小，对环境影响有限
-- 依赖性强：生活完全依赖自然资源的直接供给
-- 适应而非改造：通过观察学习自然，发展生存技能
-- 影响特点：局部、短期、低强度，生态可自我恢复
+Page Content:
+- Hunter-gatherer civilization: Small scale human activity, limited impact on environment
+- Strong dependence: Life completely depended on direct supply of natural resources
+- Adaptation not modification: Learned from nature, developed survival skills
+- Impact characteristics: Local, short-term, low intensity, self-recovering ecology
 
-其他页面素材（如果有请积极添加，包括markdown图片链接、公式、表格等）
+Other page materials (add if available, including markdown image links, formulas, tables, etc.)
 
-【关于图片】如果参考文件中包含以 /files/ 开头的本地文件URL图片（例如 /files/mineru/xxx/image.png），请将这些图片以markdown格式输出，例如：![图片描述](/files/mineru/xxx/image.png)。这些图片会被包含在PPT页面中。
+[About Images] If the reference files contain local file URL images starting with /files/ (e.g., /files/mineru/xxx/image.png), please output these images in markdown format, e.g., ![Image Description](/files/mineru/xxx/image.png). These images will be included in the PPT page.
 
 {get_language_instruction(language)}
 """)
@@ -306,39 +307,39 @@ def get_image_generation_prompt(page_desc: str, outline_text: str,
     material_images_note = ""
     if has_material_images:
         material_images_note = (
-            "\n\n提示：除了模板参考图片（用于风格参考）外，还提供了额外的素材图片。"
-            "这些素材图片是可供挑选和使用的元素，你可以从这些素材图片中选择合适的图片、图标、图表或其他视觉元素"
-            "直接整合到生成的PPT页面中。请根据页面内容的需要，智能地选择和组合这些素材图片中的元素。"
+            "\n\nHint: In addition to the template reference image (for style reference), extra material images are provided."
+            "These material images are elements available for selection. You can choose suitable images, icons, charts, or other visual elements from them"
+            "and directly integrate them into the generated PPT page. Please intelligently select and combine elements from these material images based on the page content needs."
         )
     
     # 添加额外要求到提示词
     extra_req_text = ""
     if extra_requirements and extra_requirements.strip():
-        extra_req_text = f"\n\n额外要求（请务必遵循）：\n{extra_requirements}\n"
+        extra_req_text = f"\n\nExtra Requirements (Must Follow):\n{extra_requirements}\n"
 
 # 该处参考了@歸藏的A工具箱
     prompt = (f"""\
-你是一位专家级UI UX演示设计师，专注于生成设计良好的PPT页面。
-当前PPT页面的页面描述如下:
+You are an expert UI/UX presentation designer, focused on generating well-designed PPT pages.
+The current PPT page description is as follows:
 <page_description>
 {page_desc}
 </page_description>
 
 <reference_information>
-整个PPT的大纲为：
+The entire PPT outline is:
 {outline_text}
 
-当前位于章节：{current_section}
+Current section: {current_section}
 </reference_information>
 
 
 <design_guidelines>
-- 要求文字清晰锐利, 画面为4K分辨率，16:9比例。
-- 配色和设计语言和模板图片严格相似。
-- 根据内容自动设计最完美的构图，不重不漏地渲染"页面描述"中的文本。
-- 如非必要，禁止出现 markdown 格式符号（如 # 和 * 等）。
-- 只参考风格设计，禁止出现模板中的文字。
-- 使用大小恰当的装饰性图形或插画对空缺位置进行填补。
+- Require clear and sharp text, 4K resolution, 16:9 aspect ratio.
+- Color scheme and design language must be strictly similar to the template image.
+- Automatically design the most perfect composition based on content, rendering the text in "page description" without omission or duplication.
+- Do not use markdown symbols (like # and *) unless necessary.
+- Only reference the style design, do not use the text from the template.
+- Use appropriately sized decorative graphics or illustrations to fill empty spaces.
 </design_guidelines>
 {get_ppt_language_instruction(language)}
 {material_images_note}{extra_req_text}
@@ -360,20 +361,22 @@ def get_image_edit_prompt(edit_instruction: str, original_description: str = Non
         格式化后的 prompt 字符串
     """
     if original_description:
-        # 删除"其他页面素材："之后的内容，避免被前面的图影响
-        if "其他页面素材" in original_description:
+        # Remove content after "Other page materials" to avoid influence from previous images
+        if "Other page materials" in original_description:
+            original_description = original_description.split("Other page materials")[0].strip()
+        elif "其他页面素材" in original_description:  # Fallback for old content
             original_description = original_description.split("其他页面素材")[0].strip()
         
         prompt = (f"""\
-该PPT页面的原始页面描述为：
+The original description of this PPT page is:
 {original_description}
 
-现在，根据以下指令修改这张PPT页面：{edit_instruction}
+Now, please modify this PPT page according to the following instruction: {edit_instruction}
 
-要求维持原有的文字内容和设计风格，只按照指令进行修改。提供的参考图中既有新素材，也有用户手动框选出的区域，请你根据原图和参考图的关系智能判断用户意图。
+Requirement: Maintain the original text content and design style, only modify according to the instruction. The provided reference image contains both new materials and user-selected regions. Please intelligently judge the user's intent based on the relationship between the original image and the reference image.
 """)
     else:
-        prompt = f"根据以下指令修改这张PPT页面：{edit_instruction}\n保持原有的内容结构和设计风格，只按照指令进行修改。提供的参考图中既有新素材，也有用户手动框选出的区域，请你根据原图和参考图的关系智能判断用户意图。"
+        prompt = f"Modify this PPT page according to the following instruction: {edit_instruction}\nMaintain the original content structure and design style, only modify according to the instruction. The provided reference image contains both new materials and user-selected regions. Please intelligently judge the user's intent based on the relationship between the original image and the reference image."
     
     logger.debug(f"[get_image_edit_prompt] Final prompt:\n{prompt}")
     return prompt
@@ -425,7 +428,8 @@ You can organize the content in two ways:
         {{"title": "Topic 1", "points": ["point1", "point2"]}},
         {{"title": "Topic 2", "points": ["point1", "point2"]}}
     ]
-    }}
+    }},
+    ...(as many parts as needed)
 ]
 
 Important rules:
@@ -477,17 +481,17 @@ For each page in the outline, extract the corresponding description from the ori
 Return a JSON array where each element corresponds to a page in the outline (in the same order).
 Each element should be a string containing the page description in the following format:
 
-页面标题：[页面标题]
+Page Title: [Page Title]
 
-页面文字：
-- [要点1]
-- [要点2]
+Page Content:
+- [Point 1]
+- [Point 2]
 ...
 
 Example output format:
 [
-    "页面标题：人工智能的诞生\\n页面文字：\\n- 1950 年，图灵提出"图灵测试"...",
-    "页面标题：AI 的发展历程\\n页面文字：\\n- 1950年代：符号主义...",
+    "Page Title: The Birth of AI\\nPage Content:\\n- In 1950, Turing proposed the 'Turing Test'...",
+    "Page Title: History of AI\\nPage Content:\\n- 1950s: Symbolism...",
     ...
 ]
 
@@ -526,7 +530,7 @@ def get_outline_refinement_prompt(current_outline: List[Dict], user_requirement:
     
     # 处理空大纲的情况
     if not current_outline or len(current_outline) == 0:
-        outline_text = "(当前没有内容)"
+        outline_text = "(No content currently)"
     else:
         outline_text = json.dumps(current_outline, ensure_ascii=False, indent=2)
     
@@ -534,63 +538,63 @@ def get_outline_refinement_prompt(current_outline: List[Dict], user_requirement:
     previous_req_text = ""
     if previous_requirements and len(previous_requirements) > 0:
         prev_list = "\n".join([f"- {req}" for req in previous_requirements])
-        previous_req_text = f"\n\n之前用户提出的修改要求：\n{prev_list}\n"
+        previous_req_text = f"\n\nPrevious user modification requests:\n{prev_list}\n"
     
     # 构建原始输入信息（根据项目类型显示不同的原始内容）
-    original_input_text = "\n原始输入信息：\n"
+    original_input_text = "\nOriginal Input Info:\n"
     if project_context.creation_type == 'idea' and project_context.idea_prompt:
-        original_input_text += f"- PPT构想：{project_context.idea_prompt}\n"
+        original_input_text += f"- PPT Idea: {project_context.idea_prompt}\n"
     elif project_context.creation_type == 'outline' and project_context.outline_text:
-        original_input_text += f"- 用户提供的大纲文本：\n{project_context.outline_text}\n"
+        original_input_text += f"- User provided outline text:\n{project_context.outline_text}\n"
     elif project_context.creation_type == 'descriptions' and project_context.description_text:
-        original_input_text += f"- 用户提供的页面描述文本：\n{project_context.description_text}\n"
+        original_input_text += f"- User provided page description text:\n{project_context.description_text}\n"
     elif project_context.idea_prompt:
-        original_input_text += f"- 用户输入：{project_context.idea_prompt}\n"
+        original_input_text += f"- User Input: {project_context.idea_prompt}\n"
     
     prompt = (f"""\
 You are a helpful assistant that modifies PPT outlines based on user requirements.
 {original_input_text}
-当前的 PPT 大纲结构如下：
+The current PPT outline structure is as follows:
 
 {outline_text}
 {previous_req_text}
-**用户现在提出新的要求：{user_requirement}**
+**User's new requirement: {user_requirement}**
 
-请根据用户的要求修改和调整大纲。你可以：
-- 添加、删除或重新排列页面
-- 修改页面标题和要点
-- 调整页面的组织结构
-- 添加或删除章节（part）
-- 合并或拆分页面
-- 根据用户要求进行任何合理的调整
-- 如果当前没有内容，请根据用户要求和原始输入信息创建新的大纲
+Please modify and adjust the outline based on the user's requirement. You can:
+- Add, delete, or rearrange pages
+- Modify page titles and points
+- Adjust page organization structure
+- Add or delete sections (parts)
+- Merge or split pages
+- Make any reasonable adjustments based on user requirements
+- If there is currently no content, create a new outline based on the user requirement and original input
 
-输出格式可以选择：
+Output format options:
 
-1. 简单格式（适用于没有主要章节的短 PPT）：
+1. Simple format (for short PPTs without major sections):
 [{{"title": "title1", "points": ["point1", "point2"]}}, {{"title": "title2", "points": ["point1", "point2"]}}]
 
-2. 基于章节的格式（适用于有明确主要章节的长 PPT）：
+2. Part-based format (for longer PPTs with major sections):
 [
     {{
-    "part": "第一部分：引言",
+    "part": "Part 1: Introduction",
     "pages": [
-        {{"title": "欢迎", "points": ["point1", "point2"]}},
-        {{"title": "概述", "points": ["point1", "point2"]}}
+        {{"title": "Welcome", "points": ["point1", "point2"]}},
+        {{"title": "Overview", "points": ["point1", "point2"]}}
     ]
     }},
     {{
-    "part": "第二部分：主要内容",
+    "part": "Part 2: Main Content",
     "pages": [
-        {{"title": "主题1", "points": ["point1", "point2"]}},
-        {{"title": "主题2", "points": ["point1", "point2"]}}
+        {{"title": "Topic 1", "points": ["point1", "point2"]}},
+        {{"title": "Topic 2", "points": ["point1", "point2"]}}
     ]
     }}
 ]
 
-选择最适合内容的格式。当 PPT 有清晰的主要章节时使用章节格式。
+Choose the format that best fits the content. Use parts when the PPT has clear major sections.
 
-现在请根据用户要求修改大纲，只输出 JSON 格式的大纲，不要包含其他文字。
+Now please modify the outline based on user requirements. Return only the JSON outline, no other text.
 {get_language_instruction(language)}
 """)
     
@@ -623,81 +627,81 @@ def get_descriptions_refinement_prompt(current_descriptions: List[Dict], user_re
     previous_req_text = ""
     if previous_requirements and len(previous_requirements) > 0:
         prev_list = "\n".join([f"- {req}" for req in previous_requirements])
-        previous_req_text = f"\n\n之前用户提出的修改要求：\n{prev_list}\n"
+        previous_req_text = f"\n\nPrevious user modification requests:\n{prev_list}\n"
     
     # 构建原始输入信息
-    original_input_text = "\n原始输入信息：\n"
+    original_input_text = "\nOriginal Input Info:\n"
     if project_context.creation_type == 'idea' and project_context.idea_prompt:
-        original_input_text += f"- PPT构想：{project_context.idea_prompt}\n"
+        original_input_text += f"- PPT Idea: {project_context.idea_prompt}\n"
     elif project_context.creation_type == 'outline' and project_context.outline_text:
-        original_input_text += f"- 用户提供的大纲文本：\n{project_context.outline_text}\n"
+        original_input_text += f"- User provided outline text:\n{project_context.outline_text}\n"
     elif project_context.creation_type == 'descriptions' and project_context.description_text:
-        original_input_text += f"- 用户提供的页面描述文本：\n{project_context.description_text}\n"
+        original_input_text += f"- User provided page description text:\n{project_context.description_text}\n"
     elif project_context.idea_prompt:
-        original_input_text += f"- 用户输入：{project_context.idea_prompt}\n"
+        original_input_text += f"- User Input: {project_context.idea_prompt}\n"
     
     # 构建大纲文本
     outline_text = ""
     if outline:
         outline_json = json.dumps(outline, ensure_ascii=False, indent=2)
-        outline_text = f"\n\n完整的 PPT 大纲：\n{outline_json}\n"
+        outline_text = f"\n\nComplete PPT Outline:\n{outline_json}\n"
     
     # 构建所有页面描述的汇总
-    all_descriptions_text = "当前所有页面的描述：\n\n"
+    all_descriptions_text = "Current descriptions of all pages:\n\n"
     has_any_description = False
     for desc in current_descriptions:
         page_num = desc.get('index', 0) + 1
-        title = desc.get('title', '未命名')
+        title = desc.get('title', 'Untitled')
         content = desc.get('description_content', '')
         if isinstance(content, dict):
             content = content.get('text', '')
         
         if content:
             has_any_description = True
-            all_descriptions_text += f"--- 第 {page_num} 页：{title} ---\n{content}\n\n"
+            all_descriptions_text += f"--- Page {page_num}: {title} ---\n{content}\n\n"
         else:
-            all_descriptions_text += f"--- 第 {page_num} 页：{title} ---\n(当前没有内容)\n\n"
+            all_descriptions_text += f"--- Page {page_num}: {title} ---\n(No content currently)\n\n"
     
     if not has_any_description:
-        all_descriptions_text = "当前所有页面的描述：\n\n(当前没有内容，需要基于大纲生成新的描述)\n\n"
+        all_descriptions_text = "Current descriptions of all pages:\n\n(No content currently, need to generate new descriptions based on outline)\n\n"
     
     prompt = (f"""\
 You are a helpful assistant that modifies PPT page descriptions based on user requirements.
 {original_input_text}{outline_text}
 {all_descriptions_text}
 {previous_req_text}
-**用户现在提出新的要求：{user_requirement}**
+**User's new requirement: {user_requirement}**
 
-请根据用户的要求修改和调整所有页面的描述。你可以：
-- 修改页面标题和内容
-- 调整页面文字的详细程度
-- 添加或删除要点
-- 调整描述的结构和表达
-- 确保所有页面描述都符合用户的要求
-- 如果当前没有内容，请根据大纲和用户要求创建新的描述
+Please modify and adjust all page descriptions based on the user's requirement. You can:
+- Modify page titles and content
+- Adjust the detail level of page text
+- Add or delete points
+- Adjust structure and expression of descriptions
+- Ensure all page descriptions meet user requirements
+- If there is currently no content, create new descriptions based on the outline and user requirements
 
-请为每个页面生成修改后的描述，格式如下：
+Please generate modified descriptions for each page in the following format:
 
-页面标题：[页面标题]
+Page Title: [Page Title]
 
-页面文字：
-- [要点1]
-- [要点2]
+Page Content:
+- [Point 1]
+- [Point 2]
 ...
-其他页面素材（如果有请加上，包括markdown图片链接等）
+Other page materials (add if available, including markdown image links etc.)
 
-提示：如果参考文件中包含以 /files/ 开头的本地文件URL图片（例如 /files/mineru/xxx/image.png），请将这些图片以markdown格式输出，例如：![图片描述](/files/mineru/xxx/image.png)，而不是作为普通文本。
+Hint: If the reference files contain local file URL images starting with /files/ (e.g., /files/mineru/xxx/image.png), please output these images in markdown format, e.g., ![Image Description](/files/mineru/xxx/image.png), instead of plain text.
 
-请返回一个 JSON 数组，每个元素是一个字符串，对应每个页面的修改后描述（按页面顺序）。
+Please return a JSON array, where each element is a string corresponding to the modified description of each page (in page order).
 
-示例输出格式：
+Example output format:
 [
-    "页面标题：人工智能的诞生\\n页面文字：\\n- 1950 年，图灵提出\\"图灵测试\\"...",
-    "页面标题：AI 的发展历程\\n页面文字：\\n- 1950年代：符号主义...",
+    "Page Title: The Birth of AI\\nPage Content:\\n- In 1950, Turing proposed the 'Turing Test'...",
+    "Page Title: History of AI\\nPage Content:\\n- 1950s: Symbolism...",
     ...
 ]
 
-现在请根据用户要求修改所有页面描述，只输出 JSON 数组，不要包含其他文字。
+Now please modify all page descriptions based on user requirements. Return only the JSON array, no other text.
 {get_language_instruction(language)}
 """)
     

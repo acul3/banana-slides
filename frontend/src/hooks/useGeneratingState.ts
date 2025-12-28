@@ -1,12 +1,12 @@
 import type { Page } from '@/types';
 
 /**
- * 判断页面描述是否处于生成状态
- * 只检查与描述生成相关的状态：
- * 1. 描述生成任务（isGenerating）
- * 2. AI 修改时的全局状态（isAiRefining）
+ * Determine if page description is in generating state
+ * Only checks states related to description generation:
+ * 1. Description generation task (isGenerating)
+ * 2. Global state during AI modification (isAiRefining)
  * 
- * 注意：不检查 page.status === 'GENERATING'，因为该状态在图片生成时也会被设置
+ * Note: Does not check page.status === 'GENERATING' because that status is also set during image generation
  */
 export const useDescriptionGeneratingState = (
   isGenerating: boolean,
@@ -16,10 +16,10 @@ export const useDescriptionGeneratingState = (
 };
 
 /**
- * 判断页面图片是否处于生成状态
- * 检查与图片生成相关的状态：
- * 1. 图片生成任务（isGenerating）
- * 2. 页面的 GENERATING 状态（在图片生成过程中设置）
+ * Determine if page image is in generating state
+ * Checks states related to image generation:
+ * 1. Image generation task (isGenerating)
+ * 2. Page's GENERATING status (set during image generation process)
  */
 export const useImageGeneratingState = (
   page: Page,
@@ -29,9 +29,10 @@ export const useImageGeneratingState = (
 };
 
 /**
- * @deprecated 使用 useDescriptionGeneratingState 或 useImageGeneratingState 替代
- * 原来的通用版本：合并所有生成状态
- * 问题：无法区分描述生成和图片生成，导致在描述页面看到图片生成状态
+ * @deprecated Use useDescriptionGeneratingState or useImageGeneratingState instead
+ * Original generic version: combines all generating states
+ * Problem: Cannot distinguish between description generation and image generation,
+ * causing image generation status to show on description pages
  */
 export const useGeneratingState = (
   page: Page,
@@ -42,7 +43,7 @@ export const useGeneratingState = (
 };
 
 /**
- * 简单版本：只判断页面自身的生成状态
+ * Simple version: only checks the page's own generating state
  */
 export const usePageGeneratingState = (
   page: Page,
@@ -50,5 +51,6 @@ export const usePageGeneratingState = (
 ): boolean => {
   return isGenerating || page.status === 'GENERATING';
 };
+
 
 

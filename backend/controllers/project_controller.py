@@ -294,7 +294,7 @@ def generate_outline(project_id):
         
         # Get request data and language parameter
         data = request.get_json() or {}
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'zh'))
+        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
         
         # Get reference files content and create project context
         reference_files_content = _get_project_reference_files_content(project_id)
@@ -405,7 +405,7 @@ def generate_from_description(project_id):
         # Get description text and language
         data = request.get_json() or {}
         description_text = data.get('description_text') or project.description_text
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'zh'))
+        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
         
         if not description_text:
             return bad_request("description_text is required")
@@ -528,7 +528,7 @@ def generate_descriptions(project_id):
         from flask import current_app
         # 从配置中读取默认并发数，如果请求中提供了则使用请求的值
         max_workers = data.get('max_workers', current_app.config.get('MAX_DESCRIPTION_WORKERS', 5))
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'zh'))
+        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
         
         # Create task
         task = Task(
@@ -621,7 +621,7 @@ def generate_images(project_id):
         # 从配置中读取默认并发数，如果请求中提供了则使用请求的值
         max_workers = data.get('max_workers', current_app.config.get('MAX_IMAGE_WORKERS', 8))
         use_template = data.get('use_template', True)
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'zh'))
+        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
         
         # Create task
         task = Task(
@@ -751,7 +751,7 @@ def refine_outline(project_id):
         
         # Get previous requirements and language from request
         previous_requirements = data.get('previous_requirements', [])
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'zh'))
+        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
         
         # Refine outline
         logger.info(f"开始修改大纲: 项目 {project_id}, 用户要求: {user_requirement}, 历史要求数: {len(previous_requirements)}")
@@ -842,7 +842,7 @@ def refine_outline(project_id):
         # Return pages
         return success_response({
             'pages': [page.to_dict() for page in pages_list],
-            'message': '大纲修改成功'
+            'message': 'Outline refined successfully'
         })
     
     except Exception as e:
@@ -921,7 +921,7 @@ def refine_descriptions(project_id):
         
         # Get previous requirements and language from request
         previous_requirements = data.get('previous_requirements', [])
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'zh'))
+        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
         
         # Refine descriptions
         logger.info(f"开始修改页面描述: 项目 {project_id}, 用户要求: {user_requirement}, 历史要求数: {len(previous_requirements)}")
@@ -941,9 +941,9 @@ def refine_descriptions(project_id):
             
             # 如果 AI 试图增删页面，给出明确提示
             if len(refined_descriptions) > len(pages):
-                error_msg += " 提示：如需增加页面，请在大纲页面进行操作。"
+                error_msg += " Hint: To add pages, please use the outline editor."
             elif len(refined_descriptions) < len(pages):
-                error_msg += " 提示：如需删除页面，请在大纲页面进行操作。"
+                error_msg += " Hint: To delete pages, please use the outline editor."
             
             return bad_request(error_msg)
         
@@ -967,7 +967,7 @@ def refine_descriptions(project_id):
         # Return pages
         return success_response({
             'pages': [page.to_dict() for page in pages],
-            'message': '页面描述修改成功'
+            'message': 'Page descriptions refined successfully'
         })
     
     except Exception as e:

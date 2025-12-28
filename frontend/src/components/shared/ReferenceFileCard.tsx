@@ -30,12 +30,12 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
           if (response.data?.file) {
             const updatedFile = response.data.file;
             setFile(updatedFile);
-            
+
             // Notify parent of status change
             if (onStatusChange) {
               onStatusChange(updatedFile);
             }
-            
+
             // Stop polling if completed or failed
             if (updatedFile.parse_status === 'completed' || updatedFile.parse_status === 'failed') {
               clearInterval(intervalId);
@@ -56,7 +56,7 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
 
   const handleDelete = async () => {
     if (isDeleting) return;
-    
+
     setIsDeleting(true);
     try {
       if (deleteMode === 'remove') {
@@ -75,14 +75,14 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
 
   const handleReparse = async () => {
     if (isReparsing || file.parse_status === 'parsing' || file.parse_status === 'pending') return;
-    
+
     setIsReparsing(true);
     try {
       const response = await triggerFileParse(file.id);
       if (response.data?.file) {
         const updatedFile = response.data.file;
         setFile(updatedFile);
-        
+
         // Notify parent of status change
         if (onStatusChange) {
           onStatusChange(updatedFile);
@@ -118,13 +118,13 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
   const getStatusText = () => {
     switch (file.parse_status) {
       case 'pending':
-        return '等待解析';
+        return 'Pending';
       case 'parsing':
-        return '解析中...';
+        return 'Parsing...';
       case 'completed':
-        return '解析完成';
+        return 'Completed';
       case 'failed':
-        return '解析失败';
+        return 'Failed';
       default:
         return '';
     }
@@ -145,10 +145,9 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
   };
 
   return (
-    <div 
-      className={`flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow ${
-        onClick ? 'cursor-pointer' : ''
-      }`}
+    <div
+      className={`flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow ${onClick ? 'cursor-pointer' : ''
+        }`}
       onClick={onClick}
     >
       {/* File Icon */}
@@ -168,7 +167,7 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
             {formatFileSize(file.file_size)}
           </span>
         </div>
-        
+
         {/* Status */}
         <div className="flex items-center gap-1.5 mt-1">
           {getStatusIcon()}
@@ -178,13 +177,13 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
         </div>
 
         {/* Image Caption Failure Warning */}
-        {file.parse_status === 'completed' && 
-         typeof file.image_caption_failed_count === 'number' && 
-         file.image_caption_failed_count > 0 && (
-          <p className="text-xs text-orange-500 mt-1">
-            ⚠️ {file.image_caption_failed_count} 张图片未能生成描述
-          </p>
-        )}
+        {file.parse_status === 'completed' &&
+          typeof file.image_caption_failed_count === 'number' &&
+          file.image_caption_failed_count > 0 && (
+            <p className="text-xs text-orange-500 mt-1">
+              ⚠️ {file.image_caption_failed_count} image(s) failed to generate captions
+            </p>
+          )}
 
         {/* Error Message */}
         {file.parse_status === 'failed' && file.error_message && (
@@ -205,7 +204,7 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
             }}
             disabled={isReparsing}
             className="flex-shrink-0 p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
-            title="重新解析"
+            title="Re-parse"
           >
             {isReparsing ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -214,7 +213,7 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
             )}
           </button>
         )}
-        
+
         {/* Delete Button */}
         <button
           onClick={(e) => {
@@ -223,7 +222,7 @@ export const ReferenceFileCard: React.FC<ReferenceFileCardProps> = ({
           }}
           disabled={isDeleting}
           className="flex-shrink-0 p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-          title={deleteMode === 'remove' ? '从项目中移除' : '删除文件'}
+          title={deleteMode === 'remove' ? 'Remove from project' : 'Delete file'}
         >
           {isDeleting ? (
             <Loader2 className="w-4 h-4 animate-spin" />

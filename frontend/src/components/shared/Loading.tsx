@@ -9,25 +9,25 @@ interface LoadingProps {
 
 export const Loading: React.FC<LoadingProps> = ({
   fullscreen = false,
-  message = '加载中...',
+  message = 'Loading...',
   progress,
 }) => {
   const content = (
     <div className="flex flex-col items-center justify-center">
-      {/* 加载图标 */}
+      {/* Loading icon */}
       <div className="relative w-12 h-12 mb-4">
         <div className="absolute inset-0 border-4 border-banana-100 rounded-full" />
         <div className="absolute inset-0 border-4 border-banana-500 rounded-full border-t-transparent animate-spin" />
       </div>
-      
-      {/* 消息 */}
+
+      {/* Message */}
       <p className="text-lg text-gray-700 mb-4">{message}</p>
-      
-      {/* 进度条 */}
+
+      {/* Progress bar */}
       {progress && (
         <div className="w-64">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>已完成 {progress.completed}/{progress.total} 页</span>
+            <span>Completed {progress.completed}/{progress.total} pages</span>
             <span>{Math.round((progress.completed / progress.total) * 100)}%</span>
           </div>
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -52,7 +52,7 @@ export const Loading: React.FC<LoadingProps> = ({
   return content;
 };
 
-// 骨架屏组件
+// Skeleton component
 export const Skeleton: React.FC<{ className?: string }> = ({ className }) => {
   return (
     <div
@@ -64,4 +64,5 @@ export const Skeleton: React.FC<{ className?: string }> = ({ className }) => {
     />
   );
 };
+
 

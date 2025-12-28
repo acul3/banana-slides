@@ -68,7 +68,7 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
         setProjectsLoaded(true);
       }
     } catch (error: any) {
-      console.error('加载项目列表失败:', error);
+      console.error('Failed to load project list:', error);
     }
   };
 
@@ -91,9 +91,9 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
         setMaterials(response.data.materials);
       }
     } catch (error: any) {
-      console.error('加载素材列表失败:', error);
+      console.error('Failed to load material list:', error);
       show({
-        message: error?.response?.data?.error?.message || error.message || '加载素材列表失败',
+        message: error?.response?.data?.error?.message || error.message || 'Failed to load material list',
         type: 'error',
       });
     } finally {
@@ -110,7 +110,7 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
       } else {
         if (maxSelection && newSelected.size >= maxSelection) {
           show({
-            message: `最多只能选择 ${maxSelection} 个素材`,
+            message: `Max selection limit: ${maxSelection}`,
             type: 'info',
           });
           return;
@@ -126,7 +126,7 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
   const handleConfirm = () => {
     const selected = materials.filter((m) => selectedMaterials.has(getMaterialKey(m)));
     if (selected.length === 0) {
-      show({ message: '请至少选择一个素材', type: 'info' });
+      show({ message: 'Please select at least one material', type: 'info' });
       return;
     }
     // 如果启用了保存为模板选项，传递saveAsTemplate状态
@@ -145,7 +145,7 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
     // 验证文件类型
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp', 'image/bmp', 'image/svg+xml'];
     if (!allowedTypes.includes(file.type)) {
-      show({ message: '不支持的图片格式', type: 'error' });
+      show({ message: 'Unsupported image format', type: 'error' });
       return;
     }
 
@@ -160,15 +160,15 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
         file,
         targetProjectId
       );
-      
+
       if (response.data) {
-        show({ message: '素材上传成功', type: 'success' });
+        show({ message: 'Material uploaded successfully', type: 'success' });
         loadMaterials(); // 重新加载素材列表
       }
     } catch (error: any) {
-      console.error('上传素材失败:', error);
+      console.error('Failed to upload material:', error);
       show({
-        message: error?.response?.data?.error?.message || error.message || '上传素材失败',
+        message: error?.response?.data?.error?.message || error.message || 'Failed to upload material',
         type: 'error',
       });
     } finally {
@@ -192,7 +192,7 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
     const key = getMaterialKey(material);
 
     if (!materialId) {
-      show({ message: '无法删除：缺少素材ID', type: 'error' });
+      show({ message: 'Cannot delete: Missing material ID', type: 'error' });
       return;
     }
 
@@ -210,11 +210,11 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
         next.delete(key);
         return next;
       });
-      show({ message: '素材已删除', type: 'success' });
+      show({ message: 'Material deleted', type: 'success' });
     } catch (error: any) {
-      console.error('删除素材失败:', error);
+      console.error('Failed to delete material:', error);
       show({
-        message: error?.response?.data?.error?.message || error.message || '删除素材失败',
+        message: error?.response?.data?.error?.message || error.message || 'Failed to delete material',
         type: 'error',
       });
     } finally {
@@ -233,15 +233,15 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} title="选择素材" size="lg">
+      <Modal isOpen={isOpen} onClose={onClose} title="Select Material" size="lg">
         <div className="space-y-4">
           {/* 工具栏 */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>{materials.length > 0 ? `共 ${materials.length} 个素材` : '暂无素材'}</span>
+              <span>{materials.length > 0 ? `Total ${materials.length} materials` : 'No materials'}</span>
               {selectedMaterials.size > 0 && (
                 <span className="ml-2 text-banana-600">
-                  已选择 {selectedMaterials.size} 个
+                  Selected {selectedMaterials.size}
                 </span>
               )}
               {isLoading && materials.length > 0 && (
@@ -249,13 +249,13 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
               )}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              {/* 项目筛选下拉菜单 */}
+              {/* Project Filter Dropdown */}
               <select
                 value={filterProjectId}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === 'show_more') {
-                    // 点击"查看更多项目"时展开列表
+                    // Click "View more projects" to expand list
                     setShowAllProjects(true);
                     return;
                   }
@@ -263,16 +263,16 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
                 }}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-banana-500 w-40 sm:w-48 max-w-[200px] truncate"
               >
-                {/* 固定显示的前三个选项 */}
-                <option value="all">所有素材</option>
-                <option value="none">未关联项目</option>
+                {/* Fixed first three options */}
+                <option value="all">All Materials</option>
+                <option value="none">Uncategorized</option>
                 {projectId && (
                   <option value={projectId}>
-                    当前项目{projects.find(p => p.project_id === projectId) ? `: ${renderProjectLabel(projects.find(p => p.project_id === projectId)!)}` : ''}
+                    Current Project{projects.find(p => p.project_id === projectId) ? `: ${renderProjectLabel(projects.find(p => p.project_id === projectId)!)}` : ''}
                   </option>
                 )}
-                
-                {/* 展开后显示所有项目 */}
+
+                {/* Expand to show all projects */}
                 {showAllProjects ? (
                   <>
                     <option disabled>───────────</option>
@@ -283,13 +283,13 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
                     ))}
                   </>
                 ) : (
-                  // 未展开时显示"查看更多项目"选项
+                  // Show "View more projects" when collapsed
                   projects.length > (projectId ? 1 : 0) && (
-                    <option value="show_more">+ 查看更多项目...</option>
+                    <option value="show_more">+ View more projects...</option>
                   )
                 )}
               </select>
-              
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -297,14 +297,14 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
                 onClick={loadMaterials}
                 disabled={isLoading}
               >
-                刷新
+                Refresh
               </Button>
-              
-              {/* 上传按钮 */}
+
+              {/* Upload Button */}
               <label className="inline-block cursor-pointer">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
                   <Upload size={16} />
-                  <span>{isUploading ? '上传中...' : '上传'}</span>
+                  <span>{isUploading ? 'Uploading...' : 'Upload'}</span>
                 </div>
                 <input
                   type="file"
@@ -314,8 +314,8 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
                   disabled={isUploading}
                 />
               </label>
-              
-              {/* 素材生成按钮 */}
+
+              {/* Generate Material Button */}
               {projectId && (
                 <Button
                   variant="ghost"
@@ -323,82 +323,81 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
                   icon={<Sparkles size={16} />}
                   onClick={() => setIsGeneratorOpen(true)}
                 >
-                  生成素材
+                  Generate Material
                 </Button>
               )}
-              
+
               {selectedMaterials.size > 0 && (
                 <Button variant="ghost" size="sm" onClick={handleClear}>
-                  清空选择
+                  Clear Selection
                 </Button>
               )}
             </div>
           </div>
 
-          {/* 素材网格 */}
+          {/* Material Grid */}
           {isLoading && materials.length === 0 ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-gray-400">加载中...</div>
+              <div className="text-gray-400">Loading...</div>
             </div>
           ) : materials.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-400 p-4">
               <ImageIcon size={48} className="mb-4 opacity-50" />
-              <div className="text-sm">暂无素材</div>
+              <div className="text-sm">No materials</div>
               <div className="text-xs mt-1">
-                {projectId ? '可以上传图片或使用素材生成功能创建素材' : '可以上传图片作为素材'}
+                {projectId ? 'You can upload images or use the generate feature' : 'You can upload images as materials'}
               </div>
             </div>
           ) : (
-          <div className="grid grid-cols-4 gap-4 max-h-96 overflow-y-auto  p-4">
-            {materials.map((material) => {
-              const key = getMaterialKey(material);
-              const isSelected = selectedMaterials.has(key);
-              const isDeleting = deletingIds.has(material.id);
-              return (
-                <div
-                  key={key}
-                  onClick={() => handleSelectMaterial(material)}
-                  className={`aspect-video rounded-lg border-2 cursor-pointer transition-all relative group ${
-                    isSelected
+            <div className="grid grid-cols-4 gap-4 max-h-96 overflow-y-auto  p-4">
+              {materials.map((material) => {
+                const key = getMaterialKey(material);
+                const isSelected = selectedMaterials.has(key);
+                const isDeleting = deletingIds.has(material.id);
+                return (
+                  <div
+                    key={key}
+                    onClick={() => handleSelectMaterial(material)}
+                    className={`aspect-video rounded-lg border-2 cursor-pointer transition-all relative group ${isSelected
                       ? 'border-banana-500 ring-2 ring-banana-200'
                       : 'border-gray-200 hover:border-banana-300'
-                  }`}
-                >
-                  <img
-                    src={getImageUrl(material.url)}
-                    alt={getMaterialDisplayName(material)}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  {/* 删除按钮：右上角，圆心在角上 */}
-                  <button
-                    type="button"
-                    onClick={(e) => handleDeleteMaterial(e, material)}
-                    disabled={isDeleting}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow z-10 disabled:opacity-60 disabled:cursor-not-allowed"
-                    aria-label="删除素材"
+                      }`}
                   >
-                    {isDeleting ? <RefreshCw size={12} className="animate-spin" /> : <X size={12} />}
-                  </button>
-                  {isSelected && (
-                    <div className="absolute inset-0 bg-banana-500 bg-opacity-20 flex items-center justify-center">
-                      <div className="bg-banana-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                        ✓
+                    <img
+                      src={getImageUrl(material.url)}
+                      alt={getMaterialDisplayName(material)}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    {/* Delete Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteMaterial(e, material)}
+                      disabled={isDeleting}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow z-10 disabled:opacity-60 disabled:cursor-not-allowed"
+                      aria-label="Delete material"
+                    >
+                      {isDeleting ? <RefreshCw size={12} className="animate-spin" /> : <X size={12} />}
+                    </button>
+                    {isSelected && (
+                      <div className="absolute inset-0 bg-banana-500 bg-opacity-20 flex items-center justify-center">
+                        <div className="bg-banana-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                          ✓
+                        </div>
                       </div>
+                    )}
+                    {/* 悬停时显示文件名 */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">
+                      {getMaterialDisplayName(material)}
                     </div>
-                  )}
-                  {/* 悬停时显示文件名 */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">
-                    {getMaterialDisplayName(material)}
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
           )}
 
-          {/* 底部操作 */}
+          {/* Footer Actions */}
           <div className="pt-4 border-t">
-            {/* 保存为模板选项 */}
+            {/* Save as Template Option */}
             {showSaveAsTemplateOption && (
               <div className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -409,28 +408,28 @@ export const MaterialSelector: React.FC<MaterialSelectorProps> = ({
                     className="w-4 h-4 text-banana-500 border-gray-300 rounded focus:ring-banana-500"
                   />
                   <span className="text-sm text-gray-700">
-                    同时保存到我的模板库
+                    Also save to my template library
                   </span>
                 </label>
               </div>
             )}
-            
+
             <div className="flex justify-end gap-3">
               <Button variant="ghost" onClick={onClose}>
-                取消
+                Cancel
               </Button>
               <Button
                 variant="primary"
                 onClick={handleConfirm}
                 disabled={selectedMaterials.size === 0}
               >
-                确认选择 ({selectedMaterials.size})
+                Confirm ({selectedMaterials.size})
               </Button>
             </div>
           </div>
         </div>
       </Modal>
-      
+
       {/* 素材生成组件 */}
       {projectId && (
         <MaterialGeneratorModal

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class GenAITextProvider(TextProvider):
     """Text generation using Google GenAI SDK"""
     
-    def __init__(self, api_key: str, api_base: str = None, model: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: str, api_base: str = None, model: str = "gemini-3-flash-preview"):
         """
         Initialize GenAI text provider
         
@@ -22,7 +22,7 @@ class GenAITextProvider(TextProvider):
             model: Model name to use
         """
         self.client = genai.Client(
-            http_options=types.HttpOptions(base_url=api_base) if api_base else None,
+            vertexai=True,
             api_key=api_key
         )
         self.model = model

@@ -6,7 +6,7 @@ db = SQLAlchemy(
     engine_options={
         'connect_args': {
             'check_same_thread': False,  # 允许跨线程使用（仅SQLite）
-            'timeout': 30,  # 增加超时时间到30秒
+            'timeout': 10,  # 增加超时时间到30秒
         },
         'pool_pre_ping': True,  # 连接前检查
         'pool_recycle': 3600,  # 1小时回收连接

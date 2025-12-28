@@ -10,6 +10,7 @@
 *.tif
 *.heic
 *.heif
+.venv/
 *.avif
 
 !frontend/public/**/*.png

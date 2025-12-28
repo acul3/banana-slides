@@ -48,10 +48,10 @@ export const ImagePreviewList: React.FC<ImagePreviewListProps> = ({
     <div className={`${className}`}>
       <div className="flex items-center gap-2 mb-2">
         <span className="text-sm font-medium text-gray-700">
-          图片预览 ({images.length})
+          Image Preview ({images.length})
         </span>
       </div>
-      
+
       {/* 横向滚动容器 */}
       <div className="flex gap-3 overflow-x-auto pb-2">
         {images.map((image, index) => (
@@ -73,23 +73,23 @@ export const ImagePreviewList: React.FC<ImagePreviewListProps> = ({
                   if (parent && !parent.querySelector('.error-placeholder')) {
                     const placeholder = document.createElement('div');
                     placeholder.className = 'error-placeholder w-full h-full flex items-center justify-center text-gray-400 text-xs text-center p-2';
-                    placeholder.textContent = '图片加载失败';
+                    placeholder.textContent = 'Failed to load image';
                     parent.appendChild(placeholder);
                   }
                 }}
               />
-              
+
               {/* 删除按钮 */}
               {onRemoveImage && (
                 <button
                   onClick={() => onRemoveImage(image.url)}
                   className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 active:scale-95"
-                  title="移除此图片"
+                  title="Remove this image"
                 >
                   <X size={14} />
                 </button>
               )}
-              
+
               {/* 悬浮时显示完整URL */}
               <div className="absolute inset-x-0 bottom-0 bg-black/70 text-white text-xs p-1 opacity-0 group-hover:opacity-100 transition-opacity truncate">
                 {image.url}

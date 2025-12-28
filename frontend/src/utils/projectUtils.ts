@@ -9,23 +9,23 @@ export const getProjectTitle = (project: Project): string => {
   if (project.idea_prompt) {
     return project.idea_prompt;
   }
-  
+
   // 如果没有 idea_prompt，尝试从第一个页面获取标题
   if (project.pages && project.pages.length > 0) {
     // 按 order_index 排序，找到第一个页面
-    const sortedPages = [...project.pages].sort((a, b) => 
+    const sortedPages = [...project.pages].sort((a, b) =>
       (a.order_index || 0) - (b.order_index || 0)
     );
     const firstPage = sortedPages[0];
-    
+
     // 如果第一个页面有 outline_content 和 title，使用它
     if (firstPage?.outline_content?.title) {
       return firstPage.outline_content.title;
     }
   }
-  
+
   // 默认返回未命名项目
-  return '未命名项目';
+  return 'Untitled Project';
 };
 
 /**
@@ -35,13 +35,13 @@ export const getFirstPageImage = (project: Project): string | null => {
   if (!project.pages || project.pages.length === 0) {
     return null;
   }
-  
+
   // 找到第一页有图片的页面
   const firstPageWithImage = project.pages.find(p => p.generated_image_path);
   if (firstPageWithImage?.generated_image_path) {
     return getImageUrl(firstPageWithImage.generated_image_path, firstPageWithImage.updated_at);
   }
-  
+
   return null;
 };
 
@@ -50,7 +50,7 @@ export const getFirstPageImage = (project: Project): string | null => {
  */
 export const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
-  return date.toLocaleString('zh-CN', {
+  return date.toLocaleString('en-US', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -64,17 +64,17 @@ export const formatDate = (dateString: string): string => {
  */
 export const getStatusText = (project: Project): string => {
   if (!project.pages || project.pages.length === 0) {
-    return '未开始';
+    return 'Not Started';
   }
   const hasImages = project.pages.some(p => p.generated_image_path);
   if (hasImages) {
-    return '已完成';
+    return 'Completed';
   }
   const hasDescriptions = project.pages.some(p => p.description_content);
   if (hasDescriptions) {
-    return '待生成图片';
+    return 'Pending Images';
   }
-  return '待生成描述';
+  return 'Pending Descriptions';
 };
 
 /**
@@ -82,9 +82,9 @@ export const getStatusText = (project: Project): string => {
  */
 export const getStatusColor = (project: Project): string => {
   const status = getStatusText(project);
-  if (status === '已完成') return 'text-green-600 bg-green-50';
-  if (status === '待生成图片') return 'text-yellow-600 bg-yellow-50';
-  if (status === '待生成描述') return 'text-blue-600 bg-blue-50';
+  if (status === 'Completed') return 'text-green-600 bg-green-50';
+  if (status === 'Pending Images') return 'text-yellow-600 bg-yellow-50';
+  if (status === 'Pending Descriptions') return 'text-blue-600 bg-blue-50';
   return 'text-gray-600 bg-gray-50';
 };
 
@@ -94,7 +94,7 @@ export const getStatusColor = (project: Project): string => {
 export const getProjectRoute = (project: Project): string => {
   const projectId = project.id || project.project_id;
   if (!projectId) return '/';
-  
+
   if (project.pages && project.pages.length > 0) {
     const hasImages = project.pages.some(p => p.generated_image_path);
     if (hasImages) {

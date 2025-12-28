@@ -1,12 +1,12 @@
 import type { Page, PageStatus } from '@/types';
 
 /**
- * 页面状态类型
+ * Page status context type
  */
 export type PageStatusContext = 'description' | 'image' | 'full';
 
 /**
- * 派生的页面状态
+ * Derived page status
  */
 export interface DerivedPageStatus {
   status: PageStatus;
@@ -15,11 +15,11 @@ export interface DerivedPageStatus {
 }
 
 /**
- * 根据上下文获取页面的派生状态
+ * Get the derived status of a page based on context
  * 
- * @param page - 页面对象
- * @param context - 上下文：'description' | 'image' | 'full'
- * @returns 派生的状态信息
+ * @param page - Page object
+ * @param context - Context: 'description' | 'image' | 'full'
+ * @returns Derived status information
  */
 export const usePageStatus = (
   page: Page,
@@ -31,67 +31,67 @@ export const usePageStatus = (
 
   switch (context) {
     case 'description':
-      // 描述页面上下文：只关心描述是否生成
+      // Description page context: only care about whether description is generated
       if (!hasDescription) {
         return {
           status: 'DRAFT',
-          label: '未生成描述',
-          description: '还没有生成描述'
+          label: 'No Description',
+          description: 'Description not yet generated'
         };
       }
       return {
         status: 'DESCRIPTION_GENERATED',
-        label: '已生成描述',
-        description: '描述已生成'
+        label: 'Description Generated',
+        description: 'Description has been generated'
       };
 
     case 'image':
-      // 图片页面上下文：关心图片生成状态
+      // Image page context: care about image generation status
       if (!hasDescription) {
         return {
           status: 'DRAFT',
-          label: '未生成描述',
-          description: '需要先生成描述'
+          label: 'No Description',
+          description: 'Need to generate description first'
         };
       }
       if (!hasImage && pageStatus !== 'GENERATING') {
         return {
           status: 'DESCRIPTION_GENERATED',
-          label: '未生成图片',
-          description: '描述已生成，等待生成图片'
+          label: 'No Image',
+          description: 'Description generated, waiting for image'
         };
       }
       if (pageStatus === 'GENERATING') {
         return {
           status: 'GENERATING',
-          label: '生成中',
-          description: '正在生成图片'
+          label: 'Generating',
+          description: 'Generating image'
         };
       }
       if (pageStatus === 'FAILED') {
         return {
           status: 'FAILED',
-          label: '失败',
-          description: '图片生成失败'
+          label: 'Failed',
+          description: 'Image generation failed'
         };
       }
       if (hasImage) {
         return {
           status: 'COMPLETED',
-          label: '已完成',
-          description: '图片已生成'
+          label: 'Completed',
+          description: 'Image generated'
         };
       }
-      // 默认返回页面状态
+      // Default: return page status
       return {
         status: pageStatus,
-        label: '未知',
-        description: '状态未知'
+        label: 'Unknown',
+        description: 'Status unknown'
       };
 
     case 'full':
     default:
-      // 完整上下文：显示页面的实际状态
+      // Full context: show actual page status
       return {
         status: pageStatus,
         label: getStatusLabel(pageStatus),
@@ -101,32 +101,32 @@ export const usePageStatus = (
 };
 
 /**
- * 获取状态标签
+ * Get status label
  */
 function getStatusLabel(status: PageStatus): string {
   const labels: Record<PageStatus, string> = {
-    DRAFT: '草稿',
-    DESCRIPTION_GENERATED: '已生成描述',
-    GENERATING: '生成中',
-    COMPLETED: '已完成',
-    FAILED: '失败',
+    DRAFT: 'Draft',
+    DESCRIPTION_GENERATED: 'Description Generated',
+    GENERATING: 'Generating',
+    COMPLETED: 'Completed',
+    FAILED: 'Failed',
   };
-  return labels[status] || '未知';
+  return labels[status] || 'Unknown';
 }
 
 /**
- * 获取状态描述
+ * Get status description
  */
 function getStatusDescription(
   status: PageStatus,
   _hasDescription: boolean,
   _hasImage: boolean
 ): string {
-  if (status === 'DRAFT') return '草稿阶段';
-  if (status === 'DESCRIPTION_GENERATED') return '描述已生成';
-  if (status === 'GENERATING') return '正在生成中';
-  if (status === 'FAILED') return '生成失败';
-  if (status === 'COMPLETED') return '全部完成';
-  return '状态未知';
+  if (status === 'DRAFT') return 'Draft stage';
+  if (status === 'DESCRIPTION_GENERATED') return 'Description generated';
+  if (status === 'GENERATING') return 'Currently generating';
+  if (status === 'FAILED') return 'Generation failed';
+  if (status === 'COMPLETED') return 'All completed';
+  return 'Status unknown';
 }
 

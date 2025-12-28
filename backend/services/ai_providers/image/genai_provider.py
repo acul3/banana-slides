@@ -7,6 +7,7 @@ from google import genai
 from google.genai import types
 from PIL import Image
 from .base import ImageProvider
+from google.genai.types import HttpOptions
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +25,18 @@ class GenAIImageProvider(ImageProvider):
             model: Model name to use
         """
         self.client = genai.Client(
-            http_options=types.HttpOptions(base_url=api_base) if api_base else None,
-            api_key=api_key
+            vertexai=True,
+            project='audyno-prod',
+            location='global',
+            http_options=HttpOptions(
+            api_version="v1",
+            headers={
+                # Options:
+                # - "dedicated": Use Provisioned Throughput
+                # - "shared": Use pay-as-you-go
+                # https://cloud.google.com/vertex-ai/generative-ai/docs/use-provisioned-throughput
+                "X-Vertex-AI-LLM-Request-Type": "dedicated"
+            })
         )
         self.model = model
     

@@ -82,7 +82,7 @@ export function downloadFile(blob: Blob, filename: string) {
  */
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleString('zh-CN', {
+  return date.toLocaleString('en-US', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -102,18 +102,18 @@ export function generateId(): string {
  * 将错误消息转换为友好的中文提示
  */
 export function normalizeErrorMessage(errorMessage: string | null | undefined): string {
-  if (!errorMessage) return '操作失败';
-  
+  if (!errorMessage) return 'Operation failed';
+
   const message = errorMessage.toLowerCase();
-  
+
   if (message.includes('no template image found')) {
-    return '当前项目还没有模板，请先点击页面工具栏的"更换模板"按钮，选择或上传一张模板图片后再生成。';
+    return 'The project does not have a template yet. Please click "Change Template" in the toolbar to select or upload a template image before generating.';
   } else if (message.includes('page must have description content')) {
-    return '该页面还没有描述内容，请先在"编辑页面描述"步骤为此页生成或填写描述。';
+    return 'This page has no description content. Please generate or fill in the description in the "Edit Descriptions" step first.';
   } else if (message.includes('image already exists')) {
-    return '该页面已经有图片，如需重新生成，请在生成时选择"重新生成"或稍后重试。';
+    return 'This page already has an image. If you want to regenerate, please choose "Force Regenerate" or try again later.';
   }
-  
+
   return errorMessage;
 }
 

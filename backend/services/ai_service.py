@@ -262,7 +262,7 @@ class AIService:
         return pages
     
     def generate_page_description(self, project_context: ProjectContext, outline: List[Dict], 
-                                 page_outline: Dict, page_index: int, language='zh') -> str:
+                                 page_outline: Dict, page_index: int, language='en') -> str:
         """
         Generate description for a single page
         Based on demo.py gen_desc() logic
@@ -309,7 +309,7 @@ class AIService:
                             page_desc: str, page_index: int, 
                             has_material_images: bool = False,
                             extra_requirements: Optional[str] = None,
-                            language='zh') -> str:
+                            language='en') -> str:
         """
         Generate image generation prompt for a page
         Based on demo.py gen_prompts()
@@ -454,7 +454,7 @@ class AIService:
         )
         return self.generate_image(edit_instruction, current_image_path, aspect_ratio, resolution, additional_ref_images)
     
-    def parse_description_to_outline(self, project_context: ProjectContext, language='zh') -> List[Dict]:
+    def parse_description_to_outline(self, project_context: ProjectContext, language='en') -> List[Dict]:
         """
         从描述文本解析出大纲结构
         
@@ -470,7 +470,7 @@ class AIService:
     
     def parse_description_to_page_descriptions(self, project_context: ProjectContext, 
                                                outline: List[Dict],
-                                               language='zh') -> List[str]:
+                                               language='en') -> List[str]:
         """
         从描述文本切分出每页描述
         
@@ -493,7 +493,7 @@ class AIService:
     def refine_outline(self, current_outline: List[Dict], user_requirement: str,
                       project_context: ProjectContext,
                       previous_requirements: Optional[List[str]] = None,
-                      language='zh') -> List[Dict]:
+                      language='en') -> List[Dict]:
         """
         根据用户要求修改已有大纲
         
@@ -520,7 +520,7 @@ class AIService:
                            project_context: ProjectContext,
                            outline: List[Dict] = None,
                            previous_requirements: Optional[List[str]] = None,
-                           language='zh') -> List[str]:
+                           language='en') -> List[str]:
         """
         根据用户要求修改已有页面描述
         

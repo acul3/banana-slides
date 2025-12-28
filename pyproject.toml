@@ -21,4 +21,5 @@ dependencies = [
 ]
 
 [tool.uv]
+required-environments = ["python_version == '3.13'"]
 index-url = "https://pypi.tuna.tsinghua.edu.cn/simple"

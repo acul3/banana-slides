@@ -3,15 +3,15 @@ import { ReferenceFileCard, useToast } from '@/components/shared';
 import { listProjectReferenceFiles, type ReferenceFile } from '@/api/endpoints';
 
 interface ReferenceFileListProps {
-  // 两种模式：1. 从 API 加载（传入 projectId） 2. 直接显示（传入 files）
+  // Two modes: 1. Load from API (pass projectId) 2. Display directly (pass files)
   projectId?: string | null;
-  files?: ReferenceFile[]; // 如果传入 files，则直接显示，不从 API 加载
+  files?: ReferenceFile[]; // If files is passed, display directly without loading from API
   onFileClick?: (fileId: string) => void;
   onFileStatusChange?: (file: ReferenceFile) => void;
-  onFileDelete?: (fileId: string) => void; // 如果传入，使用外部删除逻辑
+  onFileDelete?: (fileId: string) => void; // If passed, use external delete logic
   deleteMode?: 'delete' | 'remove';
-  title?: string; // 自定义标题
-  className?: string; // 自定义样式
+  title?: string; // Custom title
+  className?: string; // Custom style
 }
 
 export const ReferenceFileList: React.FC<ReferenceFileListProps> = ({
@@ -21,14 +21,14 @@ export const ReferenceFileList: React.FC<ReferenceFileListProps> = ({
   onFileStatusChange,
   onFileDelete,
   deleteMode = 'remove',
-  title = '已上传的文件',
+  title = 'Uploaded Files',
   className = 'mb-6',
 }) => {
   const [internalFiles, setInternalFiles] = useState<ReferenceFile[]>([]);
   const { show } = useToast();
   const showRef = useRef(show);
 
-  // 如果传入了 files，使用外部文件列表；否则从 API 加载
+  // If files is passed, use external file list; otherwise load from API
   const isExternalMode = externalFiles !== undefined;
   const files = isExternalMode ? externalFiles : internalFiles;
 
@@ -36,7 +36,7 @@ export const ReferenceFileList: React.FC<ReferenceFileListProps> = ({
     showRef.current = show;
   }, [show]);
 
-  // 只在非外部模式下从 API 加载
+  // Only load from API in non-external mode
   useEffect(() => {
     if (isExternalMode || !projectId) {
       if (!isExternalMode) {
@@ -52,9 +52,9 @@ export const ReferenceFileList: React.FC<ReferenceFileListProps> = ({
           setInternalFiles(response.data.files);
         }
       } catch (error: any) {
-        console.error('加载文件列表失败:', error);
+        console.error('Failed to load file list:', error);
         showRef.current({
-          message: error?.response?.data?.error?.message || error.message || '加载文件列表失败',
+          message: error?.response?.data?.error?.message || error.message || 'Failed to load file list',
           type: 'error',
         });
       }
@@ -72,10 +72,10 @@ export const ReferenceFileList: React.FC<ReferenceFileListProps> = ({
 
   const handleFileDelete = (fileId: string) => {
     if (onFileDelete) {
-      // 使用外部删除逻辑
+      // Use external delete logic
       onFileDelete(fileId);
     } else if (!isExternalMode) {
-      // 内部删除逻辑
+      // Internal delete logic
       setInternalFiles(prev => prev.filter(f => f.id !== fileId));
     }
   };
@@ -102,4 +102,5 @@ export const ReferenceFileList: React.FC<ReferenceFileListProps> = ({
     </div>
   );
 };
+
 
