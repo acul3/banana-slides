@@ -13,7 +13,7 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { initializeProject, isGlobalLoading } = useProjectStore();
   const { show, ToastContainer } = useToast();
-  
+
   const [activeTab, setActiveTab] = useState<CreationType>('idea');
   const [content, setContent] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<File | null>(null);
@@ -36,7 +36,7 @@ export const Home: React.FC = () => {
   useEffect(() => {
     const projectId = localStorage.getItem('currentProjectId');
     setCurrentProjectId(projectId);
-    
+
     // 加载用户模板列表（用于按需获取File）
     const loadTemplates = async () => {
       try {
@@ -66,19 +66,19 @@ export const Home: React.FC = () => {
     }
 
     console.log('Clipboard items:', items.length);
-    
+
     // 检查是否有文件或图片
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       console.log(`Item ${i}:`, { kind: item.kind, type: item.type });
-      
+
       if (item.kind === 'file') {
         const file = item.getAsFile();
         console.log('Got file:', file);
-        
+
         if (file) {
           console.log('File details:', { name: file.name, type: file.type, size: file.size });
-          
+
           // 检查是否是图片
           if (file.type.startsWith('image/')) {
             console.log('Image detected, uploading...');
@@ -86,13 +86,13 @@ export const Home: React.FC = () => {
             await handleImageUpload(file);
             return;
           }
-          
+
           // 检查文件类型（参考文件）
           const allowedExtensions = ['pdf', 'docx', 'pptx', 'doc', 'ppt', 'xlsx', 'xls', 'csv', 'txt', 'md'];
           const fileExt = file.name.split('.').pop()?.toLowerCase();
-          
+
           console.log('File extension:', fileExt);
-          
+
           if (fileExt && allowedExtensions.includes(fileExt)) {
             console.log('File type allowed, uploading...');
             e.preventDefault(); // 阻止默认粘贴行为
@@ -115,32 +115,32 @@ export const Home: React.FC = () => {
     try {
       // 显示上传中提示
       show({ message: 'Uploading image...', type: 'info' });
-      
+
       // 保存当前光标位置
       const cursorPosition = textareaRef.current?.selectionStart || content.length;
-      
+
       // 上传图片到素材库（全局素材）
       const response = await uploadMaterial(file, null);
-      
+
       if (response?.data?.url) {
         const imageUrl = response.data.url;
-        
+
         // 生成markdown图片链接
         const markdownImage = `![image](${imageUrl})`;
-        
+
         // 在光标位置插入图片链接
         setContent(prev => {
           const before = prev.slice(0, cursorPosition);
           const after = prev.slice(cursorPosition);
-          
+
           // 如果光标前有内容且不以换行结尾，添加换行
           const prefix = before && !before.endsWith('\n') ? '\n' : '';
           // 如果光标后有内容且不以换行开头，添加换行
           const suffix = after && !after.startsWith('\n') ? '\n' : '';
-          
+
           return before + prefix + markdownImage + suffix + after;
         });
-        
+
         // 恢复光标位置（移动到插入内容之后）
         setTimeout(() => {
           if (textareaRef.current) {
@@ -150,16 +150,16 @@ export const Home: React.FC = () => {
             textareaRef.current.focus();
           }
         }, 0);
-        
+
         show({ message: 'Image uploaded! Inserted at cursor position', type: 'success' });
       } else {
         show({ message: 'Image upload failed: No image info returned', type: 'error' });
       }
     } catch (error: any) {
       console.error('Image upload failed:', error);
-      show({ 
-        message: `Image upload failed: ${error?.response?.data?.error?.message || error.message || 'Unknown error'}`, 
-        type: 'error' 
+      show({
+        message: `Image upload failed: ${error?.response?.data?.error?.message || error.message || 'Unknown error'}`,
+        type: 'error'
       });
     } finally {
       setIsUploadingFile(false);
@@ -174,18 +174,18 @@ export const Home: React.FC = () => {
     // 检查文件大小（前端预检查）
     const maxSize = 200 * 1024 * 1024; // 200MB
     if (file.size > maxSize) {
-      show({ 
-        message: `File too large: ${(file.size / 1024 / 1024).toFixed(1)}MB, max 200MB allowed`, 
-        type: 'error' 
+      show({
+        message: `File too large: ${(file.size / 1024 / 1024).toFixed(1)}MB, max 200MB allowed`,
+        type: 'error'
       });
       return;
     }
 
     // 检查是否是PPT文件，提示建议使用PDF
     const fileExt = file.name.split('.').pop()?.toLowerCase();
-    if (fileExt === 'ppt' || fileExt === 'pptx') 
-      show({  message: '💡 Tip: Converting PPT to PDF before uploading yields better parsing results',    type: 'info' });
-    
+    if (fileExt === 'ppt' || fileExt === 'pptx')
+      show({ message: '💡 Tip: Converting PPT to PDF before uploading yields better parsing results', type: 'info' });
+
     setIsUploadingFile(true);
     try {
       // 在 Home 页面，始终上传为全局文件
@@ -194,7 +194,7 @@ export const Home: React.FC = () => {
         const uploadedFile = response.data.file;
         setReferenceFiles(prev => [...prev, uploadedFile]);
         show({ message: 'File uploaded successfully', type: 'success' });
-        
+
         // 如果文件状态为 pending，自动触发解析
         if (uploadedFile.parse_status === 'pending') {
           try {
@@ -202,12 +202,12 @@ export const Home: React.FC = () => {
             // 使用解析接口返回的文件对象更新状态
             if (parseResponse?.data?.file) {
               const parsedFile = parseResponse.data.file;
-              setReferenceFiles(prev => 
+              setReferenceFiles(prev =>
                 prev.map(f => f.id === uploadedFile.id ? parsedFile : f)
               );
             } else {
               // 如果没有返回文件对象，手动更新状态为 parsing（异步线程会稍后更新）
-              setReferenceFiles(prev => 
+              setReferenceFiles(prev =>
                 prev.map(f => f.id === uploadedFile.id ? { ...f, parse_status: 'parsing' as const } : f)
               );
             }
@@ -221,17 +221,17 @@ export const Home: React.FC = () => {
       }
     } catch (error: any) {
       console.error('File upload failed:', error);
-      
+
       // 特殊处理413错误
       if (error?.response?.status === 413) {
-        show({ 
-          message: `File too large: ${(file.size / 1024 / 1024).toFixed(1)}MB, max 200MB allowed`, 
-          type: 'error' 
+        show({
+          message: `File too large: ${(file.size / 1024 / 1024).toFixed(1)}MB, max 200MB allowed`,
+          type: 'error'
         });
       } else {
-        show({ 
-          message: `File upload failed: ${error?.response?.data?.error?.message || error.message || 'Unknown error'}`, 
-          type: 'error' 
+        show({
+          message: `File upload failed: ${error?.response?.data?.error?.message || error.message || 'Unknown error'}`,
+          type: 'error'
         });
       }
     } finally {
@@ -246,7 +246,7 @@ export const Home: React.FC = () => {
 
   // 文件状态变化回调
   const handleFileStatusChange = (updatedFile: ReferenceFile) => {
-    setReferenceFiles(prev => 
+    setReferenceFiles(prev =>
       prev.map(f => f.id === updatedFile.id ? updatedFile : f)
     );
   };
@@ -283,13 +283,13 @@ export const Home: React.FC = () => {
       // 移除所有匹配该URL的markdown图片链接
       const imageRegex = new RegExp(`!\\[[^\\]]*\\]\\(${imageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`, 'g');
       let newContent = prev.replace(imageRegex, '');
-      
+
       // 清理多余的空行（最多保留一个空行）
       newContent = newContent.replace(/\n{3,}/g, '\n\n');
-      
+
       return newContent.trim();
     });
-    
+
     show({ message: 'Image removed', type: 'success' });
   };
 
@@ -332,7 +332,7 @@ export const Home: React.FC = () => {
     if (templateFile) {
       setSelectedTemplate(templateFile);
     }
-    
+
     // 处理模板 ID
     if (templateId) {
       // 判断是用户模板还是预设模板
@@ -362,13 +362,13 @@ export const Home: React.FC = () => {
     }
 
     // 检查是否有正在解析的文件
-    const parsingFiles = referenceFiles.filter(f => 
+    const parsingFiles = referenceFiles.filter(f =>
       f.parse_status === 'pending' || f.parse_status === 'parsing'
     );
     if (parsingFiles.length > 0) {
-      show({ 
-        message: `${parsingFiles.length} reference file(s) still parsing, please wait`, 
-        type: 'info' 
+      show({
+        message: `${parsingFiles.length} reference file(s) still parsing, please wait`,
+        type: 'info'
       });
       return;
     }
@@ -382,19 +382,19 @@ export const Home: React.FC = () => {
           templateFile = await getTemplateFile(templateId, userTemplates);
         }
       }
-      
+
       // 传递风格描述（只要有内容就传递，不管开关状态）
       const styleDesc = templateStyle.trim() ? templateStyle.trim() : undefined;
-      
+
       await initializeProject(activeTab, content, templateFile || undefined, styleDesc);
-      
+
       // 根据类型跳转到不同页面
       const projectId = localStorage.getItem('currentProjectId');
       if (!projectId) {
         show({ message: 'Failed to create project', type: 'error' });
         return;
       }
-      
+
       // 关联参考文件到项目
       if (referenceFiles.length > 0) {
         console.log(`Associating ${referenceFiles.length} reference files to project ${projectId}:`, referenceFiles);
@@ -415,7 +415,7 @@ export const Home: React.FC = () => {
       } else {
         console.log('No reference files to associate');
       }
-      
+
       // 关联图片素材到项目（解析content中的markdown图片链接）
       const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
       const materialUrls: string[] = [];
@@ -423,7 +423,7 @@ export const Home: React.FC = () => {
       while ((match = imageRegex.exec(content)) !== null) {
         materialUrls.push(match[2]); // match[2] 是 URL
       }
-      
+
       if (materialUrls.length > 0) {
         console.log(`Associating ${materialUrls.length} materials to project ${projectId}:`, materialUrls);
         try {
@@ -436,7 +436,7 @@ export const Home: React.FC = () => {
       } else {
         console.log('No materials to associate');
       }
-      
+
       if (activeTab === 'idea' || activeTab === 'outline') {
         navigate(`/project/${projectId}/outline`);
       } else if (activeTab === 'description') {
@@ -494,9 +494,9 @@ export const Home: React.FC = () => {
               className="sm:hidden hover:bg-banana-100/60 hover:shadow-sm hover:scale-105 transition-all duration-200"
               title="Generate Material"
             />
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate('/history')}
               className="text-xs md:text-sm hover:bg-banana-100/60 hover:shadow-sm hover:scale-105 transition-all duration-200 font-medium"
             >
@@ -526,7 +526,7 @@ export const Home: React.FC = () => {
             <span className="text-2xl animate-pulse"><Sparkles size={20} color="orange" /></span>
             <span className="text-sm font-medium text-gray-700">Native AI PPT Generator powered by nano banana pro 🍌</span>
           </div>
-          
+
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight">
             <span className="bg-gradient-to-r from-yellow-600 via-orange-500 to-pink-500 bg-clip-text text-transparent" style={{
               backgroundSize: '200% auto',
@@ -535,7 +535,7 @@ export const Home: React.FC = () => {
               Banana Slides
             </span>
           </h1>
-          
+
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-light">
             Vibe your PPT like vibing code
           </p>
@@ -546,7 +546,7 @@ export const Home: React.FC = () => {
               { icon: <Sparkles size={14} className="text-yellow-600" />, label: 'One-Line PPT Generation' },
               { icon: <FileEdit size={14} className="text-blue-500" />, label: 'Natural Language Editing' },
               { icon: <Search size={14} className="text-orange-500" />, label: 'Region-Based Editing' },
-              
+
               { icon: <Paperclip size={14} className="text-green-600" />, label: 'Export to PPTX/PDF' },
             ].map((feature, idx) => (
               <span
@@ -570,11 +570,10 @@ export const Home: React.FC = () => {
                 <button
                   key={type}
                   onClick={() => setActiveTab(type)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-6 py-2.5 md:py-3 rounded-lg font-medium transition-all text-sm md:text-base touch-manipulation ${
-                    activeTab === type
-                      ? 'bg-gradient-to-r from-banana-500 to-banana-600 text-black shadow-yellow'
-                      : 'bg-white border border-gray-200 text-gray-700 hover:bg-banana-50 active:bg-banana-100'
-                  }`}
+                  className={`flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-6 py-2.5 md:py-3 rounded-lg font-medium transition-all text-sm md:text-base touch-manipulation ${activeTab === type
+                    ? 'bg-gradient-to-r from-banana-500 to-banana-600 text-black shadow-yellow'
+                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-banana-50 active:bg-banana-100'
+                    }`}
                 >
                   <span className="scale-90 md:scale-100">{config.icon}</span>
                   <span className="truncate">{config.label}</span>
@@ -625,7 +624,7 @@ export const Home: React.FC = () => {
                 onClick={handleSubmit}
                 loading={isGlobalLoading}
                 disabled={
-                  !content.trim() || 
+                  !content.trim() ||
                   referenceFiles.some(f => f.parse_status === 'pending' || f.parse_status === 'parsing')
                 }
                 className="shadow-sm text-xs md:text-sm px-3 md:px-4"
@@ -675,7 +674,7 @@ export const Home: React.FC = () => {
               {/* 无模板模式开关 */}
               <label className="flex items-center gap-2 cursor-pointer group">
                 <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-                  使用无模板模式
+                  Use template-free mode
                 </span>
                 <div className="relative">
                   <input
@@ -697,22 +696,22 @@ export const Home: React.FC = () => {
                 </div>
               </label>
             </div>
-            
+
             {/* 根据模式显示不同的内容 */}
             {useTemplateStyle ? (
               <div className="space-y-3">
                 <Textarea
-                  placeholder="描述您想要的 PPT 风格，例如：简约商务风格，使用蓝色和白色配色，字体清晰大方..."
+                  placeholder="Describe the PPT style you want, for example: a minimalist business style, using blue and white color scheme, with clear and elegant fonts..."
                   value={templateStyle}
                   onChange={(e) => setTemplateStyle(e.target.value)}
                   rows={3}
                   className="text-sm border-2 border-gray-200 focus:border-banana-400 transition-colors duration-200"
                 />
-                
+
                 {/* 预设风格按钮 */}
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-gray-600">
-                    快速选择预设风格：
+                    Quickly select preset styles：
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {PRESET_STYLES.map((preset) => (
@@ -726,7 +725,7 @@ export const Home: React.FC = () => {
                         >
                           {preset.name}
                         </button>
-                        
+
                         {/* 悬停时显示预览图片 */}
                         {hoveredPresetId === preset.id && preset.previewImage && (
                           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -754,9 +753,9 @@ export const Home: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 <p className="text-xs text-gray-500">
-                  💡 提示：点击预设风格快速填充，或自定义描述风格、配色、布局等要求
+                  💡 Tip: Click on the preset style to quickly fill, or customize the description style, color scheme, layout, and other requirements.
                 </p>
               </div>
             ) : (
@@ -789,7 +788,7 @@ export const Home: React.FC = () => {
         multiple={true}
         initialSelectedIds={selectedFileIds}
       />
-      
+
       <FilePreviewModal fileId={previewFileId} onClose={() => setPreviewFileId(null)} />
     </div>
   );

@@ -58,13 +58,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   }, []);
 
 
-  const projectId = project.id || project.project_id;
-  if (!projectId) return null;
-
-  const title = getProjectTitle(project);
-  const pageCount = project.pages?.length || 0;
-  const statusText = getStatusText(project);
-  const statusColor = getStatusColor(project);
 
   const firstPageImage = shouldLoadImage ? getFirstPageImage(project) : null;
 

@@ -195,7 +195,7 @@ export const SlidePreview: React.FC = () => {
 
     if (hasImages) {
       confirm(
-        '将重新生成所有页面（历史记录将会保存），确定继续吗？',
+        'All pages will be regenerated (history will be saved). Are you sure you want to continue？',
         executeGenerate,
         { title: 'Confirm Regeneration', variant: 'warning' }
       );
@@ -719,7 +719,7 @@ export const SlidePreview: React.FC = () => {
             onClick={() => setIsProjectSettingsOpen(true)}
             className="hidden lg:inline-flex"
           >
-            <span className="hidden xl:inline">项目设置</span>
+            <span className="hidden xl:inline">Project Setup</span>
           </Button>
           <Button
             variant="ghost"
@@ -776,13 +776,13 @@ export const SlidePreview: React.FC = () => {
                   onClick={() => handleExport('pptx')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm"
                 >
-                  导出为 PPTX
+                  Export as PPTX
                 </button>
                 <button
                   onClick={() => handleExport('editable-pptx')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm"
                 >
-                  导出可编辑 PPTX（不稳定测试版）
+                  Export editable PPTX file (unstable beta version)
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}
@@ -807,7 +807,7 @@ export const SlidePreview: React.FC = () => {
               onClick={handleGenerateAll}
               className="w-full text-sm md:text-base"
             >
-              批量生成图片 ({currentProject.pages.length})
+              Batch image generation ({currentProject.pages.length})
             </Button>
           </div>
 

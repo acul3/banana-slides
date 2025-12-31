@@ -40,7 +40,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
         {/* 顶部标题栏 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">设置</h2>
+          <h2 className="text-xl font-bold text-gray-900">Settings</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -57,25 +57,23 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
             <nav className="p-4 space-y-2">
               <button
                 onClick={() => setActiveTab('project')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  activeTab === 'project'
-                    ? 'bg-banana-500 text-white shadow-md'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'project'
+                  ? 'bg-banana-500 text-white shadow-md'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }`}
               >
                 <FileText size={20} />
-                <span className="font-medium">项目设置</span>
+                <span className="font-medium">Project Setup</span>
               </button>
               <button
                 onClick={() => setActiveTab('global')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  activeTab === 'global'
-                    ? 'bg-banana-500 text-white shadow-md'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'global'
+                  ? 'bg-banana-500 text-white shadow-md'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }`}
               >
                 <SettingsIcon size={20} />
-                <span className="font-medium">全局设置</span>
+                <span className="font-medium">Global Settings</span>
               </button>
             </nav>
           </aside>
@@ -85,24 +83,24 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
             {activeTab === 'project' ? (
               <div className="max-w-3xl space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">项目级配置</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Project-level configuration</h3>
                   <p className="text-sm text-gray-600 mb-6">
-                    这些设置仅应用于当前项目，不影响其他项目
+                    These settings apply only to the current project and do not affect other projects
                   </p>
                 </div>
 
                 {/* 额外要求 */}
                 <div className="bg-gray-50 rounded-lg p-6 space-y-4">
                   <div>
-                    <h4 className="text-base font-semibold text-gray-900 mb-2">额外要求</h4>
+                    <h4 className="text-base font-semibold text-gray-900 mb-2">Additional requirements</h4>
                     <p className="text-sm text-gray-600">
-                      在生成每个页面时，AI 会参考这些额外要求
+                      These requirements will be referenced when generating each page
                     </p>
                   </div>
                   <Textarea
                     value={extraRequirements}
                     onChange={(e) => onExtraRequirementsChange(e.target.value)}
-                    placeholder="例如：使用紧凑的布局，顶部展示一级大纲标题，加入更丰富的PPT插图..."
+                    placeholder="For example: Use a compact layout, display the first-level outline title at the top, add more rich PPT illustrations..."
                     rows={4}
                     className="text-sm"
                   />
@@ -113,22 +111,22 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                     disabled={isSavingRequirements}
                     className="w-full sm:w-auto"
                   >
-                    {isSavingRequirements ? '保存中...' : '保存额外要求'}
+                    {isSavingRequirements ? 'Saving...' : 'Save additional requirements'}
                   </Button>
                 </div>
 
                 {/* 风格描述 */}
                 <div className="bg-blue-50 rounded-lg p-6 space-y-4">
                   <div>
-                    <h4 className="text-base font-semibold text-gray-900 mb-2">风格描述</h4>
+                    <h4 className="text-base font-semibold text-gray-900 mb-2">Style description</h4>
                     <p className="text-sm text-gray-600">
-                      描述您期望的 PPT 整体风格，AI 将根据描述生成相应风格的页面
+                      Describe the overall style of the PPT, and AI will generate pages with the corresponding style based on the description
                     </p>
                   </div>
                   <Textarea
                     value={templateStyle}
                     onChange={(e) => onTemplateStyleChange(e.target.value)}
-                    placeholder="例如：简约商务风格，使用深蓝色和白色配色，字体清晰大方，布局整洁..."
+                    placeholder="For example: Simple business style, use deep blue and white color, clear and大方, layout clean..."
                     rows={5}
                     className="text-sm"
                   />
@@ -140,13 +138,13 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                       disabled={isSavingTemplateStyle}
                       className="w-full sm:w-auto"
                     >
-                      {isSavingTemplateStyle ? '保存中...' : '保存风格描述'}
+                      {isSavingTemplateStyle ? 'Saving...' : 'Save style description'}
                     </Button>
                   </div>
                   <div className="bg-blue-100 rounded-md p-3">
                     <p className="text-xs text-blue-900">
-                      💡 <strong>提示：</strong>风格描述会在生成图片时自动添加到提示词中。
-                      如果同时上传了模板图片，风格描述会作为补充说明。
+                      💡 <strong>Tip:</strong> The style description will be automatically added to the prompt when generating images.
+                      If a template image is uploaded at the same time, the style description will be used as additional instructions.
                     </p>
                   </div>
                 </div>
@@ -154,9 +152,9 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
             ) : (
               <div className="max-w-4xl">
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">全局设置</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Global Settings</h3>
                   <p className="text-sm text-gray-600">
-                    这些设置应用于所有项目
+                    These settings apply to all projects
                   </p>
                 </div>
                 {/* 复用 Settings 组件的内容 */}

@@ -1,116 +1,107 @@
-// 预设 PPT 风格描述配置
+// Preset PPT Style Configuration
 
 export interface PresetStyle {
-    id: string;
-    name: string;
-    description: string; // 这里的描述已更新为详细的 AI 文生图 Prompt
-    previewImage?: string; // 可选的预览图片路径
-  }
-  
-  export const PRESET_STYLES: PresetStyle[] = [
-    {
-      id: 'business-simple',
-      name: '简约商务',
-      // 备选方案：背景色可改为深沉的“海军蓝”（#0B1F3B），此时前景需改为纯白（#FFFFFF）。
-      description: `视觉描述：全局视觉语言应体现国际顶级咨询公司（如麦肯锡或波士顿咨询）的专业与稳重。整体风格追求极致的扁平化与秩序感，拒绝多余的装饰，强调信息的清晰传达。光照环境应为均匀的演播室漫射光，无明显的戏剧性阴影，确保画面干净透亮。
-  
- 配色与材质：背景色必须锁定为深沉、权威的“海军蓝”（Navy Blue, #0B1F3B），前景元素则使用纯白（ #FFFFFF）和微量的天蓝色（Sky Blue, #38BDF8）作为点缀；材质上避免复杂的纹理，采用哑光纸张质感或平滑的矢量色块。
-  
-  内容与排版：排版逻辑遵循严格的模块化网格系统。请生成清晰的几何分区，使用细线条或微弱的浅灰色色块（Light Gray, #E5E7EB）来划分内容区域。字体方面，应用粗壮有力的无衬线字体（如Helvetica或Roboto）作为标题，正文保持纤细清晰。图表元素应为扁平化的2D矢量图形，如简洁的柱状图或饼图，配色单一且克制。
-  
-  渲染要求：矢量插画风格，极高清晰度，无论是文字还是图形边缘都要锐利无锯齿，展现出严谨的商务美学，适合世界500强企业汇报场景。`,
-      previewImage: '/preset-previews/business-simple.webp',
-    },
-    {
-      id: 'tech-modern',
-      name: '现代科技',
-      // 备选方案：背景色可改为“深空灰”（#1F2937）；元素可改为“四面体”或“芯片结构”；纹理可改为“电路板”或“二进制代码流”。
-      description: `视觉描述：全局视觉语言要融合赛博朋克与现代SaaS产品的未来感。整体氛围神秘、深邃且富有动感，仿佛置身于高科技的数据中心或虚拟空间。光照采用暗调环境下的自发光效果，模拟霓虹灯管和激光的辉光。
-  
- 配色与材质：背景色采用深邃的“午夜黑”（Midnight Black, #0B0F19），以衬托前景的亮度。主色调使用高饱和度的“电光蓝”（Electric Blue, #00A3FF）与“赛博紫”（Cyber Purple, #7C3AED）进行线性渐变，营造出流动的能量感。材质上大量运用半透明的玻璃、发光的网格线以及带有金属光泽的几何体。
-  
-  内容与排版：画面中应包含悬浮的3D几何元素（如立方体、四面体或芯片结构），这些元素应带有线框渲染（Wireframe）效果。排版布局倾向于不对称的动态平衡，使用具有科技感的等宽字体或现代无衬线体。背景中可以隐约添加电路板纹理、二进制代码流或点阵地图作为装饰，增加细节密度。
-  
-  渲染要求：Octane Render渲染风格，强调光线追踪、辉光（Bloom）效果和景深控制，呈现出精细的粒子特效和充满科技张力的视觉冲击力。`,
-      previewImage: '/preset-previews/tech-modern.webp',
-    },
-    {
-      id: 'academic-formal',
-      name: '严谨学术',
-      // 备选方案：背景色可改为“冷灰色”（#F2F4F7）；强调色可改为“深蓝”（#1E3A8A）。
-      description: `视觉描述：全局视觉语言应模仿高质量印刷出版物或经典论文的排版风格，传达理性、客观和知识的厚重感。整体氛围安静、克制，没有任何干扰视线的炫光或过度设计。画面必须铺满全屏，严禁出现书本装订线、纸张边缘、卷角、阴影或任何形式的边框。背景不应该呈现三维立体，而应该以二维平面方式呈现。
-  
- 配色与材质：背景色严格限制为“米白色”（Off-white, #F8F7F2），模拟高级道林纸的质感。前景色仅使用纯黑（#000000）、深炭灰（Charcoal, #1F2937）和作为强调色的深红（Deep Red, #7F1D1D）或深蓝（Deep Blue, #1E3A8A）（这种强调色占比不超过5%）。材质完全呈现为高质量的纸质印刷效果，具有细腻的纸张纹理。
-  
-  内容与排版：排版必须遵循经典的版式设计原则，拥有宽阔的页边距。请使用带有衬线的字体（类似Times New Roman或Garamond）来体现传统与正式。视觉元素主要由精细的黑色线条框（Black, #000000）、标准的学术表格样式和黑白线稿插图（Black, #000000 / White, #FFFFFF）组成。布局上采用左右分栏或上下结构的严谨对齐方式。
-  
-  渲染要求：超高分辨率扫描件风格，强调字体的灰度抗锯齿效果和线条的锐度，画面如同精装学术期刊的内页，展现出绝对的专业性与权威性。不应该存在任何形式的页面边框，比如黑色边框或者阴影边线。`,
-      previewImage: '/preset-previews/academic-formal.webp',
-    },
-    {
-      id: 'creative-fun',
-      name: '活泼创意',
-      // 备选方案：背景色可改为“暖黄色”（#FFD54A）；风格可改为“剪纸风格”或“粗糙边缘插画”。
-      description: `视觉描述：全局视觉语言要像一个充满活力的初创公司Pitch Deck或儿童教育应用界面。整体氛围轻松、愉悦、充满想象力，打破常规的束缚。光照明亮且充满阳光感，色彩之间没有阴影，呈现彻底的扁平化。
-  
- 配色与材质：背景色使用高明度的“暖黄色”（Warm Yellow, #FFD54A）。配色方案极其大胆，混合使用鲜艳的“活力橙”（Vibrant Orange, #FF6A00）、“草绿”（Grass Green, #22C55E）和“天蓝”（Sky Blue, #38BDF8），形成孟菲斯（Memphis）风格的撞色效果。材质上模拟手绘涂鸦、剪纸或粗糙边缘的矢量插画。
-  
-  内容与排版：画面内容应包含手绘风格的插图元素，如涂鸦箭头、星星、波浪线和不规则的有机形状色块。排版上允许文字倾斜、重叠或跳跃，打破僵硬的网格。字体选用圆润可爱的圆体或手写体。请在角落放置一些拟人化的可爱物体或夸张的对话气泡。
-  
-  渲染要求：Dribbble热门插画风格，色彩鲜艳平涂，线条流畅且富有弹性，视觉上给人一种快乐、友好且极具亲和力的感觉。`,
-      previewImage: '/preset-previews/creative-fun.webp',
-    },
-    {
-      id: 'minimalist-clean',
-      name: '极简清爽',
-      // 备选方案：视觉锚点可改为“极简摄影图片”；材质可改为“大理石纹理”。
-      description: `视觉描述：全局视觉语言借鉴北欧设计（Scandinavian Design）和Kinfolk杂志的审美。整体氛围空灵、静谧，强调“少即是多”的哲学。光照采用极柔和的漫反射天光，阴影非常淡且边缘模糊，营造出空气感。
-  
-  配色与材质：背景色为极浅的“雾霾灰”（Haze Gray, #F5F5F7）。前景色仅使用中灰色（Mid Gray, #6B7280）和低饱和度的莫兰迪色系（如灰蓝（Morandi Gray Blue, #7A8FA6））作为微小的点缀。材质上体现细腻的哑光质感，偶尔出现一点点石膏（Plaster）的微纹理。
-  
-  内容与排版：构图的核心是“留白”（Negative Space），留白面积应占据画面的70%以上。排版极为克制，文字字号较小，行间距宽大，使用纤细优雅的非衬线字体。视觉锚点是简单的几何线条构成的图标，布局上追求绝对的平衡。
-  
-  渲染要求：极简主义摄影风格，高动态范围（HDR），画面极其干净，没有任何噪点，展现出一种画廊般的艺术陈列感。`,
-      previewImage: '/preset-previews/minimalist-clean.webp',
-    },
-    {
-      id: 'luxury-premium',
-      name: '高端奢华',
-      // 备选方案：背景色可改为“墨绿”或“勃艮第红”；前景色可改为“玫瑰金”；材质可改为“大理石”或“黑金沙”。
-      description: `视觉描述：全局视觉语言要融合高端腕表广告或五星级酒店的品牌形象。整体氛围神秘、高贵、独一无二。光照采用戏剧性的伦勃朗光或聚光灯效果，重点照亮关键元素，其余部分隐没在黑暗中。
-  
-  配色与材质：背景色严格锁定为深沉的“曜石黑”（Obsidian Black, #0B0B0F）。前景色主要由“香槟金”（Champagne Gold, #F7E7CE）构成。材质上必须体现昂贵的触感，核心组合为：背景呈现哑光黑天鹅绒质感，前景装饰呈现拉丝金属质感。
-  
-  内容与排版：排版采用经典的居中对齐或对称布局，强调仪式感。字体必须使用高雅的衬线体（Serif），字间距适当加宽以体现尊贵。画面中可以加入细致的金色边框线条、Art Deco风格的装饰纹样。如果有3D物体，应呈现出珠宝般的抛光质感。
-  
-  渲染要求：电影级写实渲染，强调材质的物理属性（PBR），特别是金属的高光反射和丝绒的漫反射细节，画面呈现出奢侈品广告大片的高级质感。`,
-      previewImage: '/preset-previews/luxury-premium.webp',
-    },
-    {
-      id: 'nature-fresh',
-      name: '自然清新',
-      // 备选方案：背景色可改为“鼠尾草绿”或“亚麻色”；元素可改为“鹅卵石”或“水滴”。
-      description: `视觉描述：全局视觉语言旨在唤起人们对大自然、环保和健康生活的向往，类似全食超市（Whole Foods）或Aesop的品牌视觉。整体氛围治愈、透气、有机。光照模拟清晨穿过树叶的斑驳阳光（丁达尔效应），温暖而柔和。
-  
-  配色与材质：背景色采用柔和的“米色”（Beige, #EAD9C6）。配色方案取自自然界，重点使用森林绿（Forest Green, #14532D）和大地棕（Earth Brown, #7A4E2D）。材质上强调天然纹理，如再生纸的颗粒感和植物叶片的脉络。
-  
-  内容与排版：画面中应融合真实的自然元素，主要是伸展的绿植叶片，这些元素可以作为背景装饰或前景框架。排版使用圆润亲和的字体。布局上可以稍微松散，模仿自然生长的形态。阴影处理要柔和自然，避免生硬的黑色投影。
-  
-  渲染要求：微距摄影风格结合3D渲染，强调植物表面的透光感（Subsurface Scattering）和自然材质的细腻纹理，画面清新淡雅，令人心旷神怡。`,
-      previewImage: '/preset-previews/nature-fresh.webp',
-    },
-    {
-        id: 'gradient-vibrant',
-        name: '渐变活力',
-        // 备选方案：配色可改为“落日橙紫色系”；材质可改为“丝绸光泽”。
-        description: `视觉描述：全局视觉语言对标现代科技独角兽公司（如Stripe或Linear）的官网视觉，呈现一种极光般的流动美感。整体氛围梦幻、通透且富有呼吸感，避免刺眼的撞色，强调色彩之间的优雅融合。
+  id: string;
+  name: string;
+  description: string; // Updated to detailed AI text-to-image prompts
+  previewImage?: string; // Optional path for preview images
+}
 
-  配色与材质：背景即前景，使用全屏的弥散渐变色。配色方案采用高雅且和谐的“全息色系”，以深邃的“宝石蓝”（Royal Blue, #2563EB）为基底，平滑过渡到“紫罗兰”（Violet, #7C3AED）和明亮的“洋红色”（Magenta, #DB2777）。颜色之间如水彩般晕染，没有生硬的边界。材质上锁定为“磨砂玻璃（Frosted Glass）”质感，让色彩看起来像是透过一层雾面屏透出来的，增加朦胧的高级感。插画使用有质感的半立体彩色设计。
+export const PRESET_STYLES: PresetStyle[] = [
+  {
+    id: 'business-simple',
+    name: 'Corporate Minimalist',
+    description: `Visual Description: The global visual language should reflect the professionalism and stability of top-tier international consulting firms (e.g., McKinsey or BCG). The style pursues extreme flat design and a sense of order, rejecting redundant decoration and emphasizing clear information delivery. Lighting should be uniform studio diffuse light, without dramatic shadows, ensuring a clean and transparent frame.
 
-  内容与排版：画面核心是缓慢流动的有机波浪形状，形态柔和自然。排版上使用醒目的粗体无衬线字（Bold Sans-serif），文字颜色为纯白（#FFFFFF），以确保在多彩背景上的绝对清晰度。界面元素采用“玻璃拟态”（Glassmorphism），即高透明度的白色圆角卡片，带有细腻的白色描边和背景模糊效果。
+Colors & Materials: The background color must be locked to a deep, authoritative "Navy Blue" (#0B1F3B). Foreground elements use pure white (#FFFFFF) with subtle "Sky Blue" (#38BDF8) accents. Materials should avoid complex textures, using matte paper textures or smooth vector blocks.
 
-  渲染要求：C4D流体模拟渲染，强调“丝绸”般的顺滑光泽，配合轻微的噪点（Grain）增加质感，色彩饱满但不刺眼，展现出流光溢彩的现代数字美学。`,
-        previewImage: '/preset-previews/gradient-vibrant.webp',
-      },
-  ];
-  
+Content & Layout: The layout follows a strict modular grid system. Generate clear geometric partitions using thin lines or faint "Light Gray" (#E5E7EB) blocks to divide content areas. Use bold, strong sans-serif fonts (e.g., Helvetica or Roboto) for titles, keeping body text slender and clear. Charts should be flat 2D vector graphics, such as simple bar or pie charts with restrained color palettes.
+
+Rendering Requirements: Vector illustration style, ultra-high definition, sharp edges for text and graphics without aliasing, showcasing rigorous business aesthetics suitable for Fortune 500 corporate reports.`,
+    previewImage: '/preset-previews/business-simple.webp',
+  },
+  {
+    id: 'tech-modern',
+    name: 'Modern Tech',
+    description: `Visual Description: The visual language merges Cyberpunk vibes with the futuristic feel of modern SaaS products. The atmosphere is mysterious, deep, and dynamic, resembling a high-tech data center or virtual space. Lighting uses self-illuminating effects in a dark environment, simulating neon tubes and laser glows.
+
+Colors & Materials: The background uses a deep "Midnight Black" (#0B0F19) to contrast foreground brightness. The main palette features high-saturation "Electric Blue" (#00A3FF) and "Cyber Purple" (#7C3AED) in linear gradients to create a sense of flowing energy. Materials involve semi-transparent glass, glowing grid lines, and metallic geometric bodies.
+
+Content & Layout: The frame should include floating 3D geometric elements (e.g., cubes, tetrahedrons, or chip structures) with wireframe rendering effects. The layout tends toward asymmetrical dynamic balance, using tech-style monospaced fonts or modern sans-serifs. Backgrounds can subtly feature circuit board textures, binary code streams, or dot-matrix maps.
+
+Rendering Requirements: Octane Render style, emphasizing ray tracing, bloom effects, and depth-of-field control, presenting fine particle effects and a high-tech visual impact.`,
+    previewImage: '/preset-previews/tech-modern.webp',
+  },
+  {
+    id: 'academic-formal',
+    name: 'Rigorous Academic',
+    description: `Visual Description: The visual language mimics high-quality print publications or classic thesis layouts, conveying rationality, objectivity, and intellectual weight. The atmosphere is quiet and restrained. The frame must be full-screen; strictly no book binding lines, paper edges, curled corners, shadows, or borders. The background should be presented as a 2D plane rather than 3D.
+
+Colors & Materials: Background is strictly limited to "Off-white" (#F8F7F2), simulating high-end Daolin paper. Foreground uses pure black (#000000), "Charcoal" (#1F2937), and an accent color of "Deep Red" (#7F1D1D) or "Deep Blue" (#1E3A8A) (accents not exceeding 5%). The texture is entirely high-quality paper print with fine grain.
+
+Content & Layout: Layout must follow classic typography principles with wide margins. Use serif fonts (similar to Times New Roman or Garamond) for tradition and formality. Visual elements consist of fine black line frames (#000000), standard academic table styles, and black-and-white line art illustrations. Use rigorous alignment in split-column or top-bottom structures.
+
+Rendering Requirements: Ultra-high-resolution scan style, emphasizing font anti-aliasing and line sharpness. The image should look like an inner page of a hardcover academic journal. No borders or shadow lines should exist.`,
+    previewImage: '/preset-previews/academic-formal.webp',
+  },
+  {
+    id: 'creative-fun',
+    name: 'Creative & Playful',
+    description: `Visual Description: The visual language feels like a vibrant startup pitch deck or an educational app interface. The atmosphere is relaxed, joyful, and imaginative, breaking conventional constraints. Lighting is bright and sunny with no shadows, presenting a completely flat look.
+
+Colors & Materials: Background uses high-brightness "Warm Yellow" (#FFD54A). The palette is bold, mixing "Vibrant Orange" (#FF6A00), "Grass Green" (#22C55E), and "Sky Blue" (#38BDF8) for a Memphis-style color clash. Materials simulate hand-drawn doodles, paper cutouts, or rough-edged vector illustrations.
+
+Content & Layout: Includes hand-drawn elements like doodle arrows, stars, wavy lines, and irregular organic shapes. Layout allows text to tilt, overlap, or jump, breaking rigid grids. Fonts are rounded, cute, or handwritten. Corner decorations can include personified objects or exaggerated speech bubbles.
+
+Rendering Requirements: Dribbble-trending illustration style, vivid flat colors, smooth elastic lines, providing a happy, friendly, and approachable visual feel.`,
+    previewImage: '/preset-previews/creative-fun.webp',
+  },
+  {
+    id: 'minimalist-clean',
+    name: 'Clean Minimalist',
+    description: `Visual Description: Inspired by Scandinavian Design and Kinfolk magazine aesthetics. The atmosphere is ethereal and quiet, emphasizing "Less is More." Lighting uses soft diffused skylight with faint, blurred-edge shadows to create a sense of airiness.
+
+Colors & Materials: Background is an ultra-light "Haze Gray" (#F5F5F7). Foreground uses "Mid Gray" (#6B7280) and low-saturation Morandi colors like "Gray Blue" (#7A8FA6) as tiny accents. Materials reflect a fine matte texture with occasional micro-textures of plaster.
+
+Content & Layout: Core composition is "Negative Space," which should occupy over 70% of the frame. Layout is extremely restrained with small font sizes, wide line spacing, and slender, elegant sans-serif fonts. Visual anchors are simple icons made of geometric lines, pursuing absolute balance.
+
+Rendering Requirements: Minimalist photography style, High Dynamic Range (HDR), extremely clean with no noise, presenting a gallery-like artistic display.`,
+    previewImage: '/preset-previews/minimalist-clean.webp',
+  },
+  {
+    id: 'luxury-premium',
+    name: 'Premium Luxury',
+    description: `Visual Description: Merges the brand image of high-end watch advertisements or five-star hotels. The atmosphere is mysterious, noble, and unique. Lighting uses dramatic Rembrandt lighting or spotlight effects, highlighting key elements while others fade into darkness.
+
+Colors & Materials: Background is strictly "Obsidain Black" (#0B0B0F). Foreground is primarily "Champagne Gold" (#F7E7CE). Materials must convey an expensive feel: matte black velvet for the background and brushed metal textures for foreground decorations.
+
+Content & Layout: Layout uses classic centered or symmetrical alignment for a sense of ceremony. Elegant Serif fonts are a must, with widened letter spacing for prestige. Includes fine gold border lines and Art Deco patterns. 3D objects should have a jewelry-like polished texture.
+
+Rendering Requirements: Cinematic realistic rendering, emphasizing Physical Based Rendering (PBR) properties—specifically metallic specular reflections and velvet diffuse details.`,
+    previewImage: '/preset-previews/luxury-premium.webp',
+  },
+  {
+    id: 'nature-fresh',
+    name: 'Fresh Nature',
+    description: `Visual Description: Evokes nature, environmentalism, and healthy living, similar to Whole Foods or Aesop's branding. The atmosphere is healing, breathable, and organic. Lighting simulates dappled morning sunlight through leaves (Tyndall effect), warm and soft.
+
+Colors & Materials: Background is a soft "Beige" (#EAD9C6). Palette is derived from nature, focusing on "Forest Green" (#14532D) and "Earth Brown" (#7A4E2D). Materials emphasize natural textures like recycled paper grain and leaf veins.
+
+Content & Layout: Integrates real natural elements, mainly stretching green leaves as background decor or foreground framing. Uses rounded, friendly fonts. Layout is slightly loose to mimic natural growth forms. Shadows are soft and natural.
+
+Rendering Requirements: Macro photography combined with 3D rendering, emphasizing plant subsurface scattering (SSS) and fine natural textures. The frame is fresh and elegant.`,
+    previewImage: '/preset-previews/nature-fresh.webp',
+  },
+  {
+    id: 'gradient-vibrant',
+    name: 'Vibrant Gradient',
+    description: `Visual Description: Benchmarked against tech unicorns like Stripe or Linear, featuring an aurora-like flowing beauty. The atmosphere is dreamy, transparent, and "breathing," avoiding harsh clashes and emphasizing elegant color blending.
+
+Colors & Materials: The background is the foreground, using full-screen mesh/diffusion gradients. The palette uses a "Holographic" scheme: "Royal Blue" (#2563EB) as a base, smoothly transitioning to "Violet" (#7C3AED) and "Magenta" (#DB2777). Textures are locked to "Frosted Glass," making colors appear through a matte screen.
+
+Content & Layout: The core consists of slow-flowing organic wave shapes. Typography uses bold Sans-serif in pure white (#FFFFFF) for absolute clarity. Elements use "Glassmorphism" with high-transparency white cards, fine white strokes, and background blur.
+
+Rendering Requirements: C4D fluid simulation rendering, emphasizing silk-like smooth luster and slight grain for texture. Vibrant yet non-piercing colors.`,
+    previewImage: '/preset-previews/gradient-vibrant.webp',
+  },
+];
