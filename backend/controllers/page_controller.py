@@ -295,7 +295,7 @@ def generate_page_image(project_id, page_id):
         data = request.get_json() or {}
         use_template = data.get('use_template', True)
         force_regenerate = data.get('force_regenerate', False)
-        language = data.get('language', flask_current_app.config.get('OUTPUT_LANGUAGE', 'en'))
+        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
         
         # Check if already generated
         if page.generated_image_path and not force_regenerate:

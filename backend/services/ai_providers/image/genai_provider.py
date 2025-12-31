@@ -13,6 +13,7 @@ from PIL import Image
 from tenacity import retry, stop_after_attempt, wait_exponential
 from .base import ImageProvider
 from google.genai.types import HttpOptions
+from config import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ class GenAIImageProvider(ImageProvider):
         api_key: str = None,
         api_base: str = None,
         model: str = "gemini-3-pro-image-preview",
-        vertexai: bool = False,
+        vertexai: bool = True,
         project_id: str = None,
         location: str = None
     ):

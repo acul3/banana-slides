@@ -23,7 +23,7 @@ class GenAITextProvider(TextProvider):
         api_key: str = None,
         api_base: str = None,
         model: str = "gemini-3-flash-preview",
-        vertexai: bool = False,
+        vertexai: bool = True,
         project_id: str = None,
         location: str = None
     ):
@@ -45,8 +45,8 @@ class GenAITextProvider(TextProvider):
             logger.info(f"Initializing GenAI text provider in Vertex AI mode, project: {project_id}, location: {location}")
             self.client = genai.Client(
                 vertexai=True,
-                project=project_id,
-                location=location or 'us-central1',
+                project="audyno-prod",
+                location="global",
                 http_options=types.HttpOptions(timeout=timeout_ms)
             )
         else:

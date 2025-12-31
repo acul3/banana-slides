@@ -321,7 +321,8 @@ class AIService:
                             page_desc: str, page_index: int, 
                             has_material_images: bool = False,
                             extra_requirements: Optional[str] = None,
-                            language='en') -> str:
+                            language='en',
+                            has_template: bool = False) -> str:
         """
         Generate image generation prompt for a page
         Based on demo.py gen_prompts()
