@@ -173,7 +173,7 @@ def reset_settings():
         settings.mineru_api_base = Config.MINERU_API_BASE
         settings.mineru_token = Config.MINERU_TOKEN
         settings.image_caption_model = Config.IMAGE_CAPTION_MODEL
-        settings.output_language = 'zh'  # 重置为默认中文
+        settings.output_language = 'en'  # 重置为默认英语
         settings.image_resolution = Config.DEFAULT_RESOLUTION
         settings.image_aspect_ratio = Config.DEFAULT_ASPECT_RATIO
         settings.max_description_workers = Config.MAX_DESCRIPTION_WORKERS

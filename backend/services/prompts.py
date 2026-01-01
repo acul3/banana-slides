@@ -16,23 +16,38 @@ logger = logging.getLogger(__name__)
 LANGUAGE_CONFIG = {
     'zh': {
         'name': 'Chinese',
-        'instruction': 'Please output all in English。',
-        'ppt_text': 'Use English for PPT text。'
+        'instruction': 'Please output all content strictly in Chinese (Simplified). Translate if necessary.',
+        'ppt_text': 'All text on the PPT MUST be in Chinese (Simplified).'
     },
     'ja': {
         'name': 'Japanese',
-        'instruction': 'すべて日本語で出力してください。',
-        'ppt_text': 'PPTのテキストは全て日本語で出力してください。'
+        'instruction': 'Please output all content strictly in Japanese. Translate if necessary.',
+        'ppt_text': 'All text on the PPT MUST be in Japanese.'
     },
     'en': {
         'name': 'English',
-        'instruction': 'Please output all in English.',
-        'ppt_text': 'Use English for PPT text.'
+        'instruction': 'Please output all content strictly in English.',
+        'ppt_text': 'All text on the PPT MUST be in English.'
+    },
+    'es': {
+        'name': 'Spanish',
+        'instruction': 'Please output all content strictly in Spanish. Translate if necessary.',
+        'ppt_text': 'All text on the PPT MUST be in Spanish.'
+    },
+    'id': {
+        'name': 'Indonesian',
+        'instruction': 'Please output all content strictly in Indonesian. Translate if necessary.',
+        'ppt_text': 'All text on the PPT MUST be in Indonesian.'
+    },
+    'ko': {
+        'name': 'Korean',
+        'instruction': 'Please output all content strictly in Korean. Translate if necessary.',
+        'ppt_text': 'All text on the PPT MUST be in Korean.'
     },
     'auto': {
         'name': 'Auto',
-        'instruction': '',  # No language restriction for auto mode
-        'ppt_text': ''
+        'instruction': 'Output in the primary language of the user requirement.',
+        'ppt_text': 'Use the language that matches the user content.'
     }
 }
 
@@ -59,8 +74,16 @@ def get_language_instruction(language: str = None) -> str:
         语言限制指令，如果是自动模式则返回空字符串
     """
     lang = language if language else get_default_output_language()
-    # Force English instruction for consistency as per user request
-    return "Please answer in English."
+    
+    config = LANGUAGE_CONFIG.get(lang, LANGUAGE_CONFIG['auto'])
+    instruction = config['instruction']
+    
+    # Add strict enforcement for non-auto languages to avoid language drift
+    if lang != 'auto':
+        lang_name = config['name']
+        instruction += f"\n\nPLEASE ALL THE LANGUAGE OUTPUT MUST BE IN {lang_name.upper()}."
+        
+    return instruction
 
 
 def get_ppt_language_instruction(language: str = None) -> str:
@@ -74,8 +97,9 @@ def get_ppt_language_instruction(language: str = None) -> str:
         PPT语言限制指令，如果是自动模式则返回空字符串
     """
     lang = language if language else get_default_output_language()
-    # Force English for PPT text
-    return "Use English for PPT text."
+    
+    config = LANGUAGE_CONFIG.get(lang, LANGUAGE_CONFIG['auto'])
+    return config['ppt_text']
 
 
 def _format_reference_files_xml(reference_files_content: Optional[List[Dict[str, str]]]) -> str:
@@ -150,8 +174,10 @@ You can organize the content in two ways:
 Choose the format that best fits the content. Use parts when the PPT has clear major sections.
 Unless otherwise specified, the first page should be kept simplest, containing only the title, subtitle, and presenter information.
 
-The user's request: {idea_prompt}. Now generate the outline, don't include any other text.
 {get_language_instruction(language)}
+
+Your task is to generate an outline based on the user's request: {idea_prompt}.
+Now generate the outline, don't include any other text.
 """)
     
     final_prompt = files_xml + prompt
@@ -174,6 +200,7 @@ def get_outline_parsing_prompt(project_context: 'ProjectContext', language: str 
     
     prompt = (f"""\
 You are a helpful assistant that parses a user-provided PPT outline text into a structured format.
+{get_language_instruction(language)}
 
 The user has provided the following outline text:
 
@@ -215,7 +242,6 @@ Important rules:
 - Extract titles and points from the original text, keeping them exactly as written
 
 Now parse the outline text above into the structured format. Return only the JSON, don't include any other text.
-{get_language_instruction(language)}
 """)
     
     final_prompt = files_xml + prompt
@@ -253,8 +279,14 @@ def get_page_description_prompt(project_context: 'ProjectContext', outline: list
     
     prompt = (f"""\
 We are generating content descriptions for each page of a PPT.
-The user's original request is:\n{original_input}\n
-We already have the complete outline:\n{outline}\n{part_info}
+{get_language_instruction(language)}
+
+The user's original request is:
+{original_input}
+
+We already have the complete outline:
+{outline}
+{part_info}
 Now please generate the description for page {page_index}:
 {page_outline}
 
@@ -277,8 +309,6 @@ Page Content:
 Other page materials (add if available, including markdown image links, formulas, tables, etc.)
 
 [About Images] If the reference files contain local file URL images starting with /files/ (e.g., /files/mineru/xxx/image.png), please output these images in markdown format, e.g., ![Image Description](/files/mineru/xxx/image.png). These images will be included in the PPT page.
-
-{get_language_instruction(language)}
 """)
     
     final_prompt = files_xml + prompt
@@ -325,6 +355,8 @@ def get_image_generation_prompt(page_desc: str, outline_text: str,
 # 该处参考了@歸藏的A工具箱
     prompt = (f"""\
 You are an expert UI/UX presentation designer, focused on generating well-designed PPT pages.
+{get_ppt_language_instruction(language)}
+
 The current PPT page description is as follows:
 <page_description>
 {page_desc}
@@ -346,7 +378,7 @@ Current section: {current_section}
 - Only reference the style design, do not use the text from the template.
 - Use appropriately sized decorative graphics or illustrations to fill empty spaces.
 </design_guidelines>
-{get_ppt_language_instruction(language)}
+
 {material_images_note}{extra_req_text}
 
 {"**注意：当前页面为ppt的封面页，请你采用专业的封面设计美学技巧，务必凸显出页面标题，分清主次，确保一下就能抓住观众的注意力。**" if page_index == 1 else ""}
@@ -404,6 +436,7 @@ def get_description_to_outline_prompt(project_context: 'ProjectContext', languag
     
     prompt = (f"""\
 You are a helpful assistant that analyzes a user-provided PPT description text and extracts the outline structure from it.
+{get_language_instruction(language)}
 
 The user has provided the following description text:
 
@@ -447,7 +480,6 @@ Important rules:
 - The points should be concise summaries of the main content for each page
 
 Now extract the outline structure from the description text above. Return only the JSON, don't include any other text.
-{get_language_instruction(language)}
 """)
     
     final_prompt = files_xml + prompt
@@ -473,6 +505,7 @@ def get_description_split_prompt(project_context: 'ProjectContext',
     
     prompt = (f"""\
 You are a helpful assistant that splits a complete PPT description text into individual page descriptions.
+{get_language_instruction(language)}
 
 The user has provided a complete description text:
 
@@ -510,7 +543,6 @@ Important rules:
 - If a page in the outline doesn't have a clear description in the text, create a reasonable description based on the outline
 
 Now split the description text into individual page descriptions. Return only the JSON array, don't include any other text.
-{get_language_instruction(language)}
 """)
     
     logger.debug(f"[get_description_split_prompt] Final prompt:\n{prompt}")
@@ -560,6 +592,7 @@ def get_outline_refinement_prompt(current_outline: List[Dict], user_requirement:
     
     prompt = (f"""\
 You are a helpful assistant that modifies PPT outlines based on user requirements.
+{get_language_instruction(language)}
 {original_input_text}
 The current PPT outline structure is as follows:
 
@@ -602,7 +635,6 @@ Output format options:
 Choose the format that best fits the content. Use parts when the PPT has clear major sections.
 
 Now please modify the outline based on user requirements. Return only the JSON outline, no other text.
-{get_language_instruction(language)}
 """)
     
     final_prompt = files_xml + prompt
@@ -674,6 +706,7 @@ def get_descriptions_refinement_prompt(current_descriptions: List[Dict], user_re
     
     prompt = (f"""\
 You are a helpful assistant that modifies PPT page descriptions based on user requirements.
+{get_language_instruction(language)}
 {original_input_text}{outline_text}
 {all_descriptions_text}
 {previous_req_text}
@@ -709,7 +742,6 @@ Example output format:
 ]
 
 Now please modify all page descriptions based on user requirements. Return only the JSON array, no other text.
-{get_language_instruction(language)}
 """)
     
     final_prompt = files_xml + prompt

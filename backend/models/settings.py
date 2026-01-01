@@ -24,7 +24,7 @@ class Settings(db.Model):
     mineru_api_base = db.Column(db.String(255), nullable=True)  # MinerU 服务地址（覆盖 Config.MINERU_API_BASE）
     mineru_token = db.Column(db.String(500), nullable=True)  # MinerU API Token（覆盖 Config.MINERU_TOKEN）
     image_caption_model = db.Column(db.String(100), nullable=True)  # 图片识别模型（覆盖 Config.IMAGE_CAPTION_MODEL）
-    output_language = db.Column(db.String(10), nullable=False, default='zh')  # 输出语言偏好（zh, en, ja, auto）
+    output_language = db.Column(db.String(10), nullable=False, default='en')  # 输出语言偏好（zh, en, ja, auto）
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
@@ -84,7 +84,7 @@ class Settings(db.Model):
                 mineru_api_base=Config.MINERU_API_BASE,
                 mineru_token=Config.MINERU_TOKEN,
                 image_caption_model=Config.IMAGE_CAPTION_MODEL,
-                output_language='zh',  # 默认中文
+                output_language='en',  # 默认英语
             )
             settings.id = 1
             db.session.add(settings)

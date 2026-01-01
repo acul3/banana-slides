@@ -22,6 +22,7 @@ export const createProject = async (data: CreateProjectRequest): Promise<ApiResp
     outline_text: data.outline_text,
     description_text: data.description_text,
     template_style: data.template_style,
+    language: data.language,
   });
   return response.data;
 };
@@ -736,7 +737,7 @@ export const dissociateFileFromProject = async (
 
 // ===== Output Language Settings =====
 
-export type OutputLanguage = 'zh' | 'ja' | 'en' | 'auto';
+export type OutputLanguage = 'zh' | 'ja' | 'en' | 'es' | 'id' | 'ko' | 'auto';
 
 export interface OutputLanguageOption {
   value: OutputLanguage;
@@ -744,9 +745,12 @@ export interface OutputLanguageOption {
 }
 
 export const OUTPUT_LANGUAGE_OPTIONS: OutputLanguageOption[] = [
-  { value: 'zh', label: 'Chinese' },
-  { value: 'ja', label: 'Japanese' },
   { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'id', label: 'Indonesian' },
+  { value: 'zh', label: 'Chinese' },
+  { value: 'ko', label: 'Korean' },
+  { value: 'ja', label: 'Japanese' },
   { value: 'auto', label: 'Auto' },
 ];
 
@@ -774,7 +778,7 @@ export const getStoredOutputLanguage = async (): Promise<OutputLanguage> => {
     return response.data.data.language;
   } catch (error) {
     console.warn('Failed to load output language from settings, using default', error);
-    return 'zh';
+    return 'en';
   }
 };
 

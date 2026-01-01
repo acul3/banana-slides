@@ -236,6 +236,7 @@ class AIService:
         Returns:
             List of outline items (may contain parts with pages or direct pages)
         """
+        logger.info(f"[AIService] Generating outline. Language: {language}")
         outline_prompt = get_outline_generation_prompt(project_context, language)
         outline = self.generate_json(outline_prompt, thinking_budget=1000)
         return outline

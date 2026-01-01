@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, FileText, FileEdit, ImagePlus, Paperclip, Palette, Lightbulb, Search, Settings } from 'lucide-react';
 import { Button, Textarea, Card, useToast, MaterialGeneratorModal, ReferenceFileList, ReferenceFileSelector, FilePreviewModal, ImagePreviewList } from '@/components/shared';
 import { TemplateSelector, getTemplateFile } from '@/components/shared/TemplateSelector';
-import { listUserTemplates, type UserTemplate, uploadReferenceFile, type ReferenceFile, associateFileToProject, triggerFileParse, uploadMaterial, associateMaterialsToProject } from '@/api/endpoints';
+import { listUserTemplates, type UserTemplate, uploadReferenceFile, type ReferenceFile, associateFileToProject, triggerFileParse, uploadMaterial, associateMaterialsToProject, OUTPUT_LANGUAGE_OPTIONS, type OutputLanguage, getStoredOutputLanguage } from '@/api/endpoints';
 import { useProjectStore } from '@/store/useProjectStore';
 import { PRESET_STYLES } from '@/config/presetStyles';
 
@@ -19,6 +19,7 @@ export const Home: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<File | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedPresetTemplateId, setSelectedPresetTemplateId] = useState<string | null>(null);
+  const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>('en');
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [userTemplates, setUserTemplates] = useState<UserTemplate[]>([]);
@@ -49,6 +50,18 @@ export const Home: React.FC = () => {
       }
     };
     loadTemplates();
+
+    // Set default language from settings
+    const loadDefaultLanguage = async () => {
+      try {
+        const storedLang = await getStoredOutputLanguage();
+        setOutputLanguage(storedLang);
+      } catch (error) {
+        // Default to en if failed
+        setOutputLanguage('en');
+      }
+    };
+    loadDefaultLanguage();
   }, []);
 
   const handleOpenMaterialModal = () => {
@@ -386,7 +399,7 @@ export const Home: React.FC = () => {
       // 传递风格描述（只要有内容就传递，不管开关状态）
       const styleDesc = templateStyle.trim() ? templateStyle.trim() : undefined;
 
-      await initializeProject(activeTab, content, templateFile || undefined, styleDesc);
+      await initializeProject(activeTab, content, templateFile || undefined, styleDesc, outputLanguage);
 
       // 根据类型跳转到不同页面
       const projectId = localStorage.getItem('currentProjectId');
@@ -606,6 +619,22 @@ export const Home: React.FC = () => {
               rows={activeTab === 'idea' ? 4 : 8}
               className="relative pr-20 md:pr-28 pb-12 md:pb-14 text-sm md:text-base border-2 border-gray-200 focus:border-banana-400 transition-colors duration-200" // Leave space for bottom-right button
             />
+
+            {/* Top-right: Language Selector */}
+            <div className="absolute right-2 md:right-3 top-2 md:top-3 z-10">
+              <select
+                value={outputLanguage}
+                onChange={(e) => setOutputLanguage(e.target.value as OutputLanguage)}
+                className="text-xs md:text-sm px-2 py-1 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-banana-400 text-gray-700 cursor-pointer hover:bg-white transition-colors"
+                title="Select output language"
+              >
+                {OUTPUT_LANGUAGE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* Bottom-left: Upload file button (paperclip icon) */}
             <button

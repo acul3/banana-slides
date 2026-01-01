@@ -166,7 +166,8 @@ def create_project():
         "idea_prompt": "...",  # required for idea type
         "outline_text": "...",  # required for outline type
         "description_text": "...",  # required for descriptions type
-        "template_id": "optional"
+        "template_id": "optional",
+        "language": "en"  # optional, default 'en'
     }
     """
     try:
@@ -183,6 +184,11 @@ def create_project():
         
         if creation_type not in ['idea', 'outline', 'descriptions']:
             return bad_request("Invalid creation_type")
+            
+        # Get language preference, default to 'en' if not provided
+        # Use config default only if not provided in request
+        default_lang = current_app.config.get('OUTPUT_LANGUAGE', 'en')
+        language = data.get('language', default_lang)
         
         # Create project
         project = Project(
@@ -191,6 +197,7 @@ def create_project():
             outline_text=data.get('outline_text'),
             description_text=data.get('description_text'),
             template_style=data.get('template_style'),
+            language=language,
             status='DRAFT'
         )
         
@@ -353,8 +360,12 @@ def generate_outline(project_id):
         ai_service = get_ai_service()
         
         # Get request data and language parameter
+        # Priority: Request param > Project setting > Config default
         data = request.get_json() or {}
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
+        default_lang = project.language or current_app.config.get('OUTPUT_LANGUAGE', 'en')
+        language = data.get('language', default_lang)
+        
+        logger.info(f"Generate outline request for project {project_id}. Resolved Language: {language} (Request: {data.get('language')}, Project: {project.language}, Config: {current_app.config.get('OUTPUT_LANGUAGE', 'en')})")
         
         # Get reference files content and create project context
         reference_files_content = _get_project_reference_files_content(project_id)
@@ -463,9 +474,11 @@ def generate_from_description(project_id):
             return bad_request("This endpoint is only for descriptions type projects")
         
         # Get description text and language
+        # Priority: Request param > Project setting > Config default
         data = request.get_json() or {}
         description_text = data.get('description_text') or project.description_text
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
+        default_lang = project.language or current_app.config.get('OUTPUT_LANGUAGE', 'en')
+        language = data.get('language', default_lang)
         
         if not description_text:
             return bad_request("description_text is required")
@@ -587,7 +600,9 @@ def generate_descriptions(project_id):
         data = request.get_json() or {}
         # 从配置中读取默认并发数，如果请求中提供了则使用请求的值
         max_workers = data.get('max_workers', current_app.config.get('MAX_DESCRIPTION_WORKERS', 5))
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
+        # Priority: Request param > Project setting > Config default
+        default_lang = project.language or current_app.config.get('OUTPUT_LANGUAGE', 'en')
+        language = data.get('language', default_lang)
         
         # Create task
         task = Task(
@@ -680,7 +695,9 @@ def generate_images(project_id):
         # 从配置中读取默认并发数，如果请求中提供了则使用请求的值
         max_workers = data.get('max_workers', current_app.config.get('MAX_IMAGE_WORKERS', 8))
         use_template = data.get('use_template', True)
-        language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
+        # Priority: Request param > Project setting > Config default
+        default_lang = project.language or current_app.config.get('OUTPUT_LANGUAGE', 'en')
+        language = data.get('language', default_lang)
         
         # Create task
         task = Task(
@@ -771,7 +788,7 @@ def refine_outline(project_id):
     Request body:
     {
         "user_requirement": "用户要求，例如：增加一页关于XXX的内容",
-        "language": "zh"  # output language: zh, en, ja, auto
+        "language": "zh"  # optional, default to project language
     }
     """
     try:
@@ -786,6 +803,10 @@ def refine_outline(project_id):
             return bad_request("user_requirement is required")
         
         user_requirement = data['user_requirement']
+        
+        # Get language: Request > Project > Config
+        default_lang = project.language or current_app.config.get('OUTPUT_LANGUAGE', 'en')
+        language = data.get('language', default_lang)
         
         # IMPORTANT: Expire all cached objects to ensure we get fresh data from database
         # This prevents issues when multiple refine operations are called in sequence

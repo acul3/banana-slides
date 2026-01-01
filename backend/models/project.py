@@ -18,6 +18,7 @@ class Project(db.Model):
     description_text = db.Column(db.Text, nullable=True)  # 用户输入的描述文本（用于description类型）
     extra_requirements = db.Column(db.Text, nullable=True)  # 额外要求，应用到每个页面的AI提示词
     creation_type = db.Column(db.String(20), nullable=False, default='idea')  # idea|outline|descriptions
+    language = db.Column(db.String(10), nullable=False, default='en')  # Output language code
     template_image_path = db.Column(db.String(500), nullable=True)
     template_style = db.Column(db.Text, nullable=True)  # 风格描述文本（无模板模式）
     status = db.Column(db.String(50), nullable=False, default='DRAFT')
@@ -51,6 +52,7 @@ class Project(db.Model):
             'description_text': self.description_text,
             'extra_requirements': self.extra_requirements,
             'creation_type': self.creation_type,
+            'language': self.language,
             'template_image_url': f'/files/{self.id}/template/{self.template_image_path.split("/")[-1]}' if self.template_image_path else None,
             'template_style': self.template_style,
             'status': self.status,

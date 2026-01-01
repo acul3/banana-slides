@@ -62,6 +62,7 @@ export interface Project {
   template_image_url?: string; // 后端返回 template_image_url
   template_image_path?: string; // 前端使用的别名
   template_style?: string; // 风格描述文本（无模板模式）
+  language?: 'zh' | 'en' | 'ja' | 'es' | 'id' | 'ko' | 'auto'; // 项目输出语言
   status: ProjectStatus;
   pages: Page[];
   created_at: string;
@@ -97,6 +98,7 @@ export interface CreateProjectRequest {
   description_text?: string;
   template_image?: File;
   template_style?: string;
+  language?: 'zh' | 'en' | 'ja' | 'es' | 'id' | 'ko' | 'auto';
 }
 
 // API响应

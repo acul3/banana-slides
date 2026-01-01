@@ -21,7 +21,7 @@ interface ProjectState {
   setError: (error: string | null) => void;
 
   // 项目操作
-  initializeProject: (type: 'idea' | 'outline' | 'description', content: string, templateImage?: File, templateStyle?: string) => Promise<void>;
+  initializeProject: (type: 'idea' | 'outline' | 'description', content: string, templateImage?: File, templateStyle?: string, language?: 'zh' | 'en' | 'ja' | 'es' | 'id' | 'ko' | 'auto') => Promise<void>;
   syncProject: (projectId?: string) => Promise<void>;
 
   // 页面操作
@@ -66,10 +66,12 @@ export const useProjectStore = create<ProjectState>((set, get) => {
       try {
         // 如果更新的是 description_content，使用专门的端点
         if (data.description_content) {
-          await api.updatePageDescription(projectId, pageId, data.description_content);
+          const lang = get().currentProject?.language;
+          await api.updatePageDescription(projectId, pageId, data.description_content, lang);
         } else if (data.outline_content) {
           // 如果更新的是 outline_content，使用专门的端点
-          await api.updatePageOutline(projectId, pageId, data.outline_content);
+          const lang = get().currentProject?.language;
+          await api.updatePageOutline(projectId, pageId, data.outline_content, lang);
         } else {
           await api.updatePage(projectId, pageId, data);
         }
@@ -103,10 +105,12 @@ export const useProjectStore = create<ProjectState>((set, get) => {
     setError: (error) => set({ error }),
 
     // 初始化项目
-    initializeProject: async (type, content, templateImage, templateStyle) => {
+    initializeProject: async (type, content, templateImage, templateStyle, language) => {
       set({ isGlobalLoading: true, error: null });
       try {
-        const request: any = {};
+        const request: any = {
+          language
+        };
 
         if (type === 'idea') {
           request.idea_prompt = content;
@@ -438,7 +442,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
 
       set({ isGlobalLoading: true, error: null });
       try {
-        const response = await api.generateOutline(currentProject.id!);
+        const response = await api.generateOutline(currentProject.id!, currentProject.language);
         console.log('[生成大纲] API响应:', response);
 
         // 刷新项目数据，确保获取最新的大纲页面
@@ -463,7 +467,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
 
       set({ isGlobalLoading: true, error: null });
       try {
-        const response = await api.generateFromDescription(currentProject.id!);
+        const response = await api.generateFromDescription(currentProject.id!, undefined, currentProject.language);
         console.log('[从描述生成] API响应:', response);
 
         // 刷新项目数据，确保获取最新的大纲和描述
@@ -507,7 +511,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
           throw new Error('Project ID does not exist');
         }
 
-        const response = await api.generateDescriptions(projectId);
+        const response = await api.generateDescriptions(projectId, currentProject.language);
         const taskId = response.data?.task_id;
 
         if (!taskId) {
@@ -619,7 +623,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
         await get().syncProject();
 
         // 传递 force_regenerate=true 以允许重新生成已有描述
-        await api.generatePageDescription(currentProject.id!, pageId, true);
+        await api.generatePageDescription(currentProject.id!, pageId, true, currentProject.language);
 
         // 刷新项目数据
         await get().syncProject();
@@ -640,7 +644,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
       const { currentProject, startAsyncTask } = get();
       if (!currentProject) return;
 
-      await startAsyncTask(() => api.generateImages(currentProject.id!));
+      await startAsyncTask(() => api.generateImages(currentProject.id!, currentProject.language));
     },
 
     // 生成单页图片（异步）
@@ -656,7 +660,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
 
       set({ error: null });
       try {
-        const response = await api.generatePageImage(currentProject.id!, pageId, forceRegenerate);
+        const response = await api.generatePageImage(currentProject.id!, pageId, forceRegenerate, currentProject.language);
         const taskId = response.data?.task_id;
 
         if (taskId) {
