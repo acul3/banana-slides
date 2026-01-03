@@ -20,7 +20,7 @@ import {
 import { Button, Loading, Modal, Textarea, useToast, useConfirm, MaterialSelector, Markdown, ProjectSettingsModal } from '@/components/shared';
 import { MaterialGeneratorModal } from '@/components/shared/MaterialGeneratorModal';
 import { TemplateSelector, getTemplateFile } from '@/components/shared/TemplateSelector';
-import { listUserTemplates, type UserTemplate } from '@/api/endpoints';
+import { listUserTemplates, type UserTemplate, IMAGE_MODEL_OPTIONS, type ImageModel } from '@/api/endpoints';
 import { materialUrlToFile } from '@/components/shared/MaterialSelector';
 import type { Material } from '@/api/endpoints';
 import { SlideCard } from '@/components/preview/SlideCard';
@@ -48,6 +48,8 @@ export const SlidePreview: React.FC = () => {
     isGlobalLoading,
     taskProgress,
     pageGeneratingTasks,
+    selectedImageModel,
+    setSelectedImageModel,
   } = useProjectStore();
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -801,6 +803,23 @@ export const SlidePreview: React.FC = () => {
         {/* Left: Thumbnail list */}
         <aside className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col flex-shrink-0">
           <div className="p-3 md:p-4 border-b border-gray-200 flex-shrink-0 space-y-2 md:space-y-3">
+            {/* Image Model Selector */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Image Model
+              </label>
+              <select
+                value={selectedImageModel || ''}
+                onChange={(e) => setSelectedImageModel(e.target.value as ImageModel || undefined)}
+                className="w-full h-9 px-3 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-banana-500 focus:border-transparent"
+              >
+                {IMAGE_MODEL_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Button
               variant="primary"
               icon={<Sparkles size={16} className="md:w-[18px] md:h-[18px]" />}

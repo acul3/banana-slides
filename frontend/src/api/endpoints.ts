@@ -218,33 +218,48 @@ export const refineDescriptions = async (
 
 // ===== 图片生成 =====
 
+// Image model options for generation
+export type ImageModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image';
+
+export const IMAGE_MODEL_OPTIONS: { value: ImageModel; label: string }[] = [
+  { value: 'gemini-3-pro-image-preview', label: 'Gemini 3 Pro (Default)' },
+  { value: 'gemini-2.5-flash-image', label: 'Gemini 2.5 Flash' },
+];
+
 /**
  * 批量生成图片
  * @param projectId 项目ID
  * @param language 输出语言（可选，默认从 sessionStorage 获取）
+ * @param imageModel 图像生成模型（可选）
  */
-export const generateImages = async (projectId: string, language?: OutputLanguage): Promise<ApiResponse> => {
+export const generateImages = async (projectId: string, language?: OutputLanguage, imageModel?: ImageModel): Promise<ApiResponse> => {
   const lang = language || await getStoredOutputLanguage();
   const response = await apiClient.post<ApiResponse>(
     `/api/projects/${projectId}/generate/images`,
-    { language: lang }
+    { language: lang, ...(imageModel && { image_model: imageModel }) }
   );
   return response.data;
 };
 
 /**
  * 生成单页图片
+ * @param projectId 项目ID
+ * @param pageId 页面ID
+ * @param forceRegenerate 是否强制重新生成
+ * @param language 输出语言（可选）
+ * @param imageModel 图像生成模型（可选）
  */
 export const generatePageImage = async (
   projectId: string,
   pageId: string,
   forceRegenerate: boolean = false,
-  language?: OutputLanguage
+  language?: OutputLanguage,
+  imageModel?: ImageModel
 ): Promise<ApiResponse> => {
   const lang = language || await getStoredOutputLanguage();
   const response = await apiClient.post<ApiResponse>(
     `/api/projects/${projectId}/pages/${pageId}/generate/image`,
-    { force_regenerate: forceRegenerate, language: lang }
+    { force_regenerate: forceRegenerate, language: lang, ...(imageModel && { image_model: imageModel }) }
   );
   return response.data;
 };

@@ -401,6 +401,7 @@ Prompts support multiple output languages via `get_language_instruction()`:
 language = request.json.get('language', 'en')
 lang_instruction = get_language_instruction(language)
 # Returns: "Please output all in English." for 'en'
+# Supported languages: zh, en, ja, es, id, ko, auto
 ```
 
 ---

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Project } from '@/types';
 import * as api from '@/api/endpoints';
+import type { ImageModel } from '@/api/endpoints';
 import { debounce, normalizeProject, normalizeErrorMessage } from '@/utils';
 
 interface ProjectState {
@@ -14,11 +15,14 @@ interface ProjectState {
   pageGeneratingTasks: Record<string, string>;
   // 每个页面的描述生成状态 (pageId -> boolean)
   pageDescriptionGeneratingTasks: Record<string, boolean>;
+  // Selected image model for generation
+  selectedImageModel: ImageModel | undefined;
 
   // Actions
   setCurrentProject: (project: Project | null) => void;
   setGlobalLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setSelectedImageModel: (model: ImageModel | undefined) => void;
 
   // 项目操作
   initializeProject: (type: 'idea' | 'outline' | 'description', content: string, templateImage?: File, templateStyle?: string, language?: 'zh' | 'en' | 'ja' | 'es' | 'id' | 'ko' | 'auto') => Promise<void>;
@@ -98,11 +102,13 @@ export const useProjectStore = create<ProjectState>((set, get) => {
     error: null,
     pageGeneratingTasks: {},
     pageDescriptionGeneratingTasks: {},
+    selectedImageModel: undefined,
 
     // Setters
     setCurrentProject: (project) => set({ currentProject: project }),
     setGlobalLoading: (loading) => set({ isGlobalLoading: loading }),
     setError: (error) => set({ error }),
+    setSelectedImageModel: (model) => set({ selectedImageModel: model }),
 
     // 初始化项目
     initializeProject: async (type, content, templateImage, templateStyle, language) => {
@@ -641,15 +647,15 @@ export const useProjectStore = create<ProjectState>((set, get) => {
 
     // 生成图片
     generateImages: async () => {
-      const { currentProject, startAsyncTask } = get();
+      const { currentProject, startAsyncTask, selectedImageModel } = get();
       if (!currentProject) return;
 
-      await startAsyncTask(() => api.generateImages(currentProject.id!, currentProject.language));
+      await startAsyncTask(() => api.generateImages(currentProject.id!, currentProject.language, selectedImageModel));
     },
 
     // 生成单页图片（异步）
     generatePageImage: async (pageId, forceRegenerate = false) => {
-      const { currentProject, pageGeneratingTasks } = get();
+      const { currentProject, pageGeneratingTasks, selectedImageModel } = get();
       if (!currentProject) return;
 
       // 如果该页面正在生成，不重复提交
@@ -660,7 +666,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
 
       set({ error: null });
       try {
-        const response = await api.generatePageImage(currentProject.id!, pageId, forceRegenerate, currentProject.language);
+        const response = await api.generatePageImage(currentProject.id!, pageId, forceRegenerate, currentProject.language, selectedImageModel);
         const taskId = response.data?.task_id;
 
         if (taskId) {

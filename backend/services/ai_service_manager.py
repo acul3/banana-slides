@@ -157,6 +157,56 @@ def clear_ai_service_cache():
             logger.info("Provider cache cleared")
 
 
+def get_ai_service_with_image_model(image_model: Optional[str] = None) -> AIService:
+    """
+    Get an AIService instance with a specific image model.
+    
+    This function allows runtime selection of image model while reusing the cached
+    text provider. If no image_model is specified, returns the default singleton.
+    
+    Args:
+        image_model: Optional image model name. If None or empty, uses default model.
+        
+    Returns:
+        AIService instance configured with the specified image model
+        
+    Note:
+        Image providers are cached per model name, so switching between models
+        is efficient after the first initialization.
+    """
+    # If no specific model requested, return the default singleton
+    if not image_model:
+        return get_ai_service()
+    
+    # Get default text model from config
+    from config import get_config
+    config = get_config()
+    
+    if has_app_context() and current_app and hasattr(current_app, "config"):
+        text_model = current_app.config.get("TEXT_MODEL", config.TEXT_MODEL)
+        default_image_model = current_app.config.get("IMAGE_MODEL", config.IMAGE_MODEL)
+    else:
+        text_model = config.TEXT_MODEL
+        default_image_model = config.IMAGE_MODEL
+    
+    # If requested model is the same as default, return the singleton
+    if image_model == default_image_model:
+        return get_ai_service()
+    
+    # Create a new AIService with the specified image model
+    logger.info(f"Creating AIService with custom image model: {image_model}")
+    
+    # Reuse cached providers
+    text_provider = _get_cached_text_provider(text_model)
+    image_provider = _get_cached_image_provider(image_model)
+    
+    # Return a new AIService instance (not singleton) with the custom image model
+    return AIService(
+        text_provider=text_provider,
+        image_provider=image_provider
+    )
+
+
 def get_provider_cache_info() -> dict:
     """
     Get information about cached providers (for debugging/monitoring)

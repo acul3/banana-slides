@@ -67,7 +67,8 @@ Creates a new PPT project.
   "idea_prompt": "A presentation about climate change",
   "outline_text": null,
   "description_text": null,
-  "template_style": "Modern minimalist design with blue accents"
+  "template_style": "Modern minimalist design with blue accents",
+  "language": "en"
 }
 ```
 
@@ -78,6 +79,7 @@ Creates a new PPT project.
 | `outline_text` | string | Conditional | Required for `outline` type |
 | `description_text` | string | Conditional | Required for `descriptions` type |
 | `template_style` | string | No | Style description for no-template mode |
+| `language` | string | No | Output language: `zh`, `en`, `ja`, `es`, `id`, `ko`, `auto` |
 
 **Response:**
 ```json
@@ -92,6 +94,7 @@ Creates a new PPT project.
     "creation_type": "idea",
     "template_image_url": null,
     "template_style": "Modern minimalist design with blue accents",
+    "language": "en",
     "status": "DRAFT",
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-15T10:30:00Z",
@@ -260,7 +263,7 @@ Generates PPT outline from idea prompt.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `language` | string | Output language: `zh`, `en`, `ja`, `auto` |
+| `language` | string | Output language: `zh`, `en`, `ja`, `es`, `id`, `ko`, `auto` |
 
 **Response:**
 ```json

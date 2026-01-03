@@ -13,7 +13,7 @@ from werkzeug.exceptions import BadRequest
 
 from models import db, Project, Page, Task, ReferenceFile
 from services import ProjectContext
-from services.ai_service_manager import get_ai_service
+from services.ai_service_manager import get_ai_service, get_ai_service_with_image_model
 from services.task_manager import (
     task_manager,
     generate_descriptions_task,
@@ -667,7 +667,8 @@ def generate_images(project_id):
     {
         "max_workers": 8,
         "use_template": true,
-        "language": "zh"  # output language: zh, en, ja, auto
+        "language": "zh",  # output language: zh, en, ja, auto
+        "image_model": "gemini-3-pro-image-preview"  # optional: image generation model
     }
     """
     try:
@@ -698,6 +699,8 @@ def generate_images(project_id):
         # Priority: Request param > Project setting > Config default
         default_lang = project.language or current_app.config.get('OUTPUT_LANGUAGE', 'en')
         language = data.get('language', default_lang)
+        # Optional: custom image model for this generation
+        image_model = data.get('image_model')
         
         # Create task
         task = Task(
@@ -714,8 +717,8 @@ def generate_images(project_id):
         db.session.add(task)
         db.session.commit()
         
-        # Get singleton AI service instance
-        ai_service = get_ai_service()
+        # Get AI service instance (with custom image model if specified)
+        ai_service = get_ai_service_with_image_model(image_model)
         
         from services import FileService
         file_service = FileService(current_app.config['UPLOAD_FOLDER'])

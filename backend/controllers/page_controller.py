@@ -6,7 +6,7 @@ from flask import Blueprint, request, current_app
 from models import db, Project, Page, PageImageVersion, Task
 from utils import success_response, error_response, not_found, bad_request
 from services import FileService, ProjectContext
-from services.ai_service_manager import get_ai_service
+from services.ai_service_manager import get_ai_service, get_ai_service_with_image_model
 from services.task_manager import task_manager, generate_single_page_image_task, edit_page_image_task
 from datetime import datetime
 from pathlib import Path
@@ -280,7 +280,8 @@ def generate_page_image(project_id, page_id):
     Request body:
     {
         "use_template": true,
-        "force_regenerate": false
+        "force_regenerate": false,
+        "image_model": "gemini-3-pro-image-preview"  # optional: image generation model
     }
     """
     try:
@@ -297,6 +298,8 @@ def generate_page_image(project_id, page_id):
         use_template = data.get('use_template', True)
         force_regenerate = data.get('force_regenerate', False)
         language = data.get('language', current_app.config.get('OUTPUT_LANGUAGE', 'en'))
+        # Optional: custom image model for this generation
+        image_model = data.get('image_model')
         
         # Check if already generated
         if page.generated_image_path and not force_regenerate:
@@ -355,8 +358,8 @@ def generate_page_image(project_id, page_id):
                 "pages": current_part_pages
             })
         
-        # Initialize services
-        ai_service = get_ai_service()
+        # Initialize services (with custom image model if specified)
+        ai_service = get_ai_service_with_image_model(image_model)
         
         file_service = FileService(current_app.config['UPLOAD_FOLDER'])
         
